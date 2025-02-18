@@ -1,0 +1,44 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+[[patches]]
+[patches.pattern]
+target = "game.lua"
+pattern = "{name = 'colour_1', ref_table = G.C, ref_value = 'RED'},"
+position = "at"
+payload = "{name = 'colour_1', ref_table = G.C, ref_value = 'BANAN1'},"
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "game.lua"
+pattern = "SC = Card(G.ROOM.T.w/2 - SC_scale*G.CARD_W/2, 10. + G.ROOM.T.h/2 - SC_scale*G.CARD_H/2, SC_scale*G.CARD_W, SC_scale*G.CARD_H, G.P_CARDS.empty, G.P_CENTERS['j_joker'])"
+position = "at"
+payload = "SC = Card(G.ROOM.T.w/2 - SC_scale*G.CARD_W/2, 10. + G.ROOM.T.h/2 - SC_scale*G.CARD_H/2, SC_scale*G.CARD_W, SC_scale*G.CARD_H, G.P_CARDS.empty, G.P_CENTERS['j_gros_michel'])"
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "game.lua"
+pattern = "{name = 'colour_1', ref_table = G.C, ref_value = 'BLUE'},"
+position = "at"
+payload = "{name = 'colour_1', ref_table = G.C, ref_value = 'BANAN1'},"
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "game.lua"
+pattern = "{name = 'colour_2', ref_table = G.C, ref_value = 'BLUE'},"
+position = "at"
+payload = "{name = 'colour_2', ref_table = G.C, ref_value = 'BANAN2'},"
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "globals.lua"
+pattern = "VERSION = VERSION..'-FULL'"
+position = "before"
+payload = "VERSION = '1.1.0b'"
+match_indent = true

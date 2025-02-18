@@ -1,0 +1,9 @@
+{
+	"id": "potassium",
+	"name": "Potassium",
+	"author": ["localthunk"],
+	"description": "A Steamodded port of the Balatro 1.1 files I found on localthunk's computer",
+	"prefix": "banana",
+	"main_file": "potassium.lua", 
+	"badge_colour": "F5D953"
+}
