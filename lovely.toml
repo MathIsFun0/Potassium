@@ -35,6 +35,15 @@ position = "at"
 payload = "{name = 'colour_2', ref_table = G.C, ref_value = 'BANAN2'},"
 match_indent = true
 
+
+[[patches]]
+[patches.pattern]
+target = "functions/common_events.lua"
+pattern = "ease_background_colour{new_colour = G.C.BLUE, special_colour = G.C.RED, tertiary_colour = darken(G.C.BLACK, 0.4), contrast = 3}"
+position = "at"
+payload = "ease_background_colour{new_colour = G.C.BANAN2, special_colour = G.C.BANAN1, tertiary_colour = darken(G.C.BLACK, 0.4), contrast = 3}"
+match_indent = true
+
 [[patches]]
 [patches.pattern]
 target = "globals.lua"
