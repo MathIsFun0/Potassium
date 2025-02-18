@@ -35,7 +35,6 @@ position = "at"
 payload = "{name = 'colour_2', ref_table = G.C, ref_value = 'BANAN2'},"
 match_indent = true
 
-
 [[patches]]
 [patches.pattern]
 target = "functions/common_events.lua"
@@ -50,4 +49,14 @@ target = "globals.lua"
 pattern = "VERSION = VERSION..'-FULL'"
 position = "before"
 payload = "VERSION = '1.1.0b'"
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "functions/UI_definitions.lua"
+pattern = '''return {n=G.UIT.ROOT, config = {align = "cm", padding = 0.03, colour = G.C.UI.TRANSPARENT_DARK}, nodes={'''
+position = "before"
+payload = '''if G.GAME.modifiers.no_discards then
+    contents.round[1].nodes = {contents.round[1].nodes[1]}
+end'''
 match_indent = true
