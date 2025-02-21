@@ -60,3 +60,12 @@ payload = '''if G.GAME.modifiers.no_discards then
     contents.round[1].nodes = {contents.round[1].nodes[1]}
 end'''
 match_indent = true
+
+
+[[patches]]
+[patches.pattern]
+target = "card_character.lua"
+pattern = '''self.children.card = Card(self.T.x, self.T.y, G.CARD_W, G.CARD_H, G.P_CARDS.empty, args.center or G.P_CENTERS.j_joker, {bypass_discovery_center = true})'''
+position = "at"
+payload = '''self.children.card = Card(self.T.x, self.T.y, G.CARD_W, G.CARD_H, G.P_CARDS.empty, args.center or G.P_CENTERS.j_gros_michel, {bypass_discovery_center = true})'''
+match_indent = true
