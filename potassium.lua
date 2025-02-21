@@ -12,6 +12,13 @@ G.trollRate = 100
 
 SMODS.config.no_mod_badges = true
 
+
+G.localization.misc.dictionary.k_plus_stone = "+1 Banana"
+G.localization.misc.dictionary.k_balanced = "Bananalanced"
+G.localization.misc.dictionary.ph_you_win = "BANANA!"
+G.localization.misc.challenge_names.c_medusa_1 = "Bananadusa"
+G.localization.misc.challenge_names.c_monolith_1 = "Bananolith"
+
 SMODS.Atlas{
     key = "centers",
     path = "Enhancers.png",
@@ -74,6 +81,7 @@ SMODS.Enhancement:take_ownership('m_stone', {
             chance = 6,
         }
     },
+    replace_base_card = true,
     loc_vars = function(self, info_queue, card)
         return {
             card.ability.extra.mult or self.config.extra.mult,
@@ -117,6 +125,35 @@ SMODS.Enhancement:take_ownership('m_stone', {
     end
 })
 
+SMODS.Joker:take_ownership('j_marble', {
+    loc_txt = {
+        name = "Banana Farm",
+        text = {
+            "Adds one {C:attention}Gros Michel{}",
+            "to deck when",
+            "{C:attention}Blind{} is selected",
+        }
+    },
+    loc_vars = function(self, info_queue, card)
+        info_queue[#info_queue+1] = G.P_CENTERS.m_stone
+    end,
+})
+
+SMODS.Joker:take_ownership('j_stone', {
+    loc_txt = {
+        name = "Banana-Flavored Banana",
+        text = {
+            "Gives {C:chips}+#1#{} Chips for",
+            "each {C:attention}Gros Michel",
+            "in your {C:attention}full deck",
+            "{C:inactive}(Currently {C:chips}+#2#{C:inactive} Chips)",
+        }
+    },
+    --[[loc_vars = function(self, info_queue, card)
+        info_queue[#info_queue+1] = G.P_CENTERS.m_stone
+    end,--]]
+})
+
 SMODS.Stake:take_ownership('stake_blue', {
     modifiers = function()
         G.GAME.starting_params.discards = 0
@@ -129,6 +166,26 @@ SMODS.Stake:take_ownership('stake_blue', {
         },
     }
 })
+
+-- New Content
+SMODS.Back{
+    key = "banana",
+    loc_txt = {
+        name = "Banana Deck",
+        text = {
+            "All cards are",
+            "{C:red,T:m_stone}Gros Michel{}",
+        }
+    },
+    prefix_config = {
+        atlas = false
+    },
+    atlas = 'Joker',
+    pos = {x = 7, y = 6},
+    apply = function(self, back)
+        G.GAME.starting_params.banana = true
+    end
+}
 
 --Misc stuff
 local cuib = create_UIBox_buttons
@@ -156,6 +213,7 @@ function get_blind_main_colour(blind) --either in the form of the blind key for 
 
 --Trolling
 function trolled()
+    if not G.trollRate then return false end
     math.randomseed(os.time())
     return math.random() < 1/G.trollRate
 end
