@@ -1,6 +1,15 @@
 G.C.BANAN1 = HEX('f5d953')
 G.C.BANAN2 = HEX('9be344')
 
+G.C.MULT = darken(G.C.BANAN1, 0.1)
+G.C.CHIPS = darken(G.C.BANAN2, 0.2)
+G.C.RED = darken(G.C.BANAN1, 0.1)
+G.C.BLUE = darken(G.C.BANAN2, 0.2)
+G.C.BLIND.Small = darken(G.C.BANAN1, 0.1)
+G.C.BLIND.won = darken(G.C.BANAN2, 0.2)
+
+G.trollRate = 100
+
 SMODS.config.no_mod_badges = true
 
 SMODS.Atlas{
@@ -129,4 +138,70 @@ function create_UIBox_buttons()
         table.remove(t.nodes, G.SETTINGS.play_button_pos == 1 and 1 or 3)
     end
     return t
+end
+
+function get_blind_main_colour(blind) --either in the form of the blind key for the P_BLINDS table or type
+    local disabled = false
+    blind = blind or ''
+    if blind == 'Boss' or blind == 'Small' or blind == 'Big' then
+      G.GAME.round_resets.blind_states = G.GAME.round_resets.blind_states or {}
+      if G.GAME.round_resets.blind_states[blind] == 'Defeated' or G.GAME.round_resets.blind_states[blind] == 'Skipped' then disabled = true end
+      blind = G.GAME.round_resets.blind_choices[blind]
+    end
+    return (disabled or not G.P_BLINDS[blind]) and G.C.BLACK or
+    G.P_BLINDS[blind].boss_colour or
+    (blind == 'bl_small' and mix_colours(HEX("009dff"), G.C.BLACK, 0.6) or
+    blind == 'bl_big' and mix_colours(G.C.ORANGE, G.C.BLACK, 0.6)) or G.C.BLACK
+  end
+
+--Trolling
+function trolled()
+    math.randomseed(os.time())
+    return math.random() < 1/G.trollRate
+end
+local dcfh = G.FUNCS.discard_cards_from_highlighted
+local pcfh = G.FUNCS.play_cards_from_highlighted
+function G.FUNCS.discard_cards_from_highlighted(e, hook)
+    if G.GAME.current_round.hands_left > 0 and not hook and trolled() then
+        G.FUNCS.change_play_discard_position({to_key = G.SETTINGS.play_button_pos % 2 + 1})
+        return pcfh(e)
+    end
+    return dcfh(e, hook)
+end
+function G.FUNCS.play_cards_from_highlighted(e)
+    if G.GAME.current_round.discards_left > 0 and trolled() then
+        G.FUNCS.change_play_discard_position({to_key = G.SETTINGS.play_button_pos % 2 + 1})
+        return dcfh(e)
+    end
+    return pcfh(e)
+end
+local bfs = G.FUNCS.buy_from_shop
+function G.FUNCS.buy_from_shop(e)
+    local card = e.config.ref_table
+    if card and card:is(Card) and not (((G.GAME.dollars-G.GAME.bankrupt_at) - G.GAME.current_round.reroll_cost < 0) and G.GAME.current_round.reroll_cost ~= 0) and trolled() then
+        return G.FUNCS.reroll_shop()
+    end
+    return bfs(e)
+end
+local uc = G.FUNCS.use_card
+function G.FUNCS.use_card(e, mute, nosave)
+    local card = e.config.ref_table
+    if (card.ability.set == "Booster" or card.ability.set == "Voucher") and G.shop and trolled() then
+        return G.FUNCS.toggle_shop()
+    end
+    return uc(e, mute, nosave)
+end
+local slb = G.FUNCS.select_blind
+local skb = G.FUNCS.skip_blind
+function G.FUNCS.select_blind(e)
+    if G.GAME.blind_on_deck ~= "Boss" and trolled() then
+        return skb(G.blind_select_opts[string.lower(G.GAME.blind_on_deck)]:get_UIE_by_ID('tag_'..G.GAME.blind_on_deck).children[2])
+    end
+    return slb(e)
+end
+function G.FUNCS.skip_blind(e)
+    if trolled() then
+        return slb(G.blind_select_opts[string.lower(G.GAME.blind_on_deck)]:get_UIE_by_ID('select_blind_button'))
+    end
+    return skb(e)
 end
