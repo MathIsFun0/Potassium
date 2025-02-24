@@ -76,3 +76,11 @@ pattern = '''local _de = nil'''
 position = "at"
 payload = '''local _de = self.GAME.starting_params.banana and {enhancement = 'm_stone'}'''
 match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "functions/UI_definitions.lua"
+pattern = '''{n=G.UIT.T, config={ref_table = G.GAME, ref_value='win_ante', scale = scale, colour = G.C.WHITE, shadow = true}}'''
+position = "at"
+payload = '''{n=G.UIT.T, config={text = "9?", scale = scale, colour = G.C.WHITE, shadow = true}}'''
+match_indent = true

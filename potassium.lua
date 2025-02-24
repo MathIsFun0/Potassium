@@ -19,9 +19,17 @@ G.localization.misc.dictionary.ph_you_win = "BANANA!"
 G.localization.misc.challenge_names.c_medusa_1 = "Bananadusa"
 G.localization.misc.challenge_names.c_monolith_1 = "Bananolith"
 
+-- Texture replacement
 SMODS.Atlas{
     key = "centers",
     path = "Enhancers.png",
+    px = 71,
+    py = 95,
+    raw_key = true
+}
+SMODS.Atlas{
+    key = "Joker",
+    path = "Jokers.png",
     px = 71,
     py = 95,
     raw_key = true
@@ -39,7 +47,7 @@ SMODS.Joker:take_ownership('j_oops', {
         }
     },
     add_to_deck = function(self, card, from_debuff)
-        G.GAME.probabilities.normal = 1e400
+        G.GAME.probabilities.normal = 1e308
     end,
     remove_from_deck = function(self, card, from_debuff)
         if not next(SMODS.find_card('j_oops')) then
@@ -69,10 +77,9 @@ SMODS.Enhancement:take_ownership('m_stone', {
     loc_txt = {
         name = "Gros Michel",
         text = {
-            "{C:mult}+15{} Mult",
-            "{C:green}1 in 6{} chance this",
-            "card is destroyed",
-            "at end of round",
+            "{C:mult}+#1#{} Mult",
+            "{C:green}#2# in #3#{} to",
+            "destroy card"
         }
     },
     config = {
@@ -83,11 +90,11 @@ SMODS.Enhancement:take_ownership('m_stone', {
     },
     replace_base_card = true,
     loc_vars = function(self, info_queue, card)
-        return {
+        return { vars = {
             card.ability.extra.mult or self.config.extra.mult,
             G.GAME and G.GAME.probabilities.normal or 1,
             card.ability.extra.chance or self.config.extra.chance,
-        }
+        }}
     end,
     calculate = function(self, card, context)
 		if context.cardarea == G.play and context.main_scoring then
@@ -95,7 +102,7 @@ SMODS.Enhancement:take_ownership('m_stone', {
                 mult = card.ability.extra.mult
             }
         end
-        if context.cardarea == G.hand and context.playing_card_end_of_round then
+        if context.cardarea == G.play and context.destroying_card then
             if pseudorandom('stone_gros_michel') < G.GAME.probabilities.normal/card.ability.extra.chance then 
                 G.E_MANAGER:add_event(Event({
                     func = function()
@@ -106,7 +113,7 @@ SMODS.Enhancement:take_ownership('m_stone', {
                         card.children.center.pinch.x = true
                         G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.3, blockable = false,
                             func = function()
-                                    G.hand:remove_card(card)
+                                    G.play:remove_card(card)
                                     card:remove()
                                     card = nil
                                 return true; end})) 
@@ -114,12 +121,11 @@ SMODS.Enhancement:take_ownership('m_stone', {
                     end
                 }))
                 return {
-                    message = localize('k_extinct_ex')
+                    message = localize('k_extinct_ex'),
+                    remove = true
                 }
             else
-                return {
-                    message = localize('k_safe_ex')
-                }
+                card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_safe_ex')})
             end
         end
     end
@@ -263,3 +269,90 @@ function G.FUNCS.skip_blind(e)
     end
     return skb(e)
 end
+
+-- Change win ante
+local gigo = Game.init_game_object
+function Game:init_game_object()
+    local ret = gigo(self)
+    ret.win_ante = ret.win_ante + 2
+    return ret
+end
+
+-- Final boss shenanigans
+local rb = reset_blinds
+function reset_blinds()
+    rb()
+    if G.GAME.round_resets.ante == 10 then
+        local Jimbo = nil
+        G.GAME.round_resets.blind_states.Small = 'Hide'
+        G.GAME.round_resets.blind_states.Big = 'Hide'
+        G.GAME.round_resets.blind_states.Boss = 'Upcoming'
+        G.GAME.blind_on_deck = 'Boss'
+        G.GAME.round_resets.blind_choices.Boss = get_new_boss()
+        G.GAME.round_resets.boss_rerolled = false
+        G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.8,
+            func = (function()
+                if G.STATE == G.STATES.BLIND_SELECT and G.blind_select then 
+                    Jimbo = Card_Character({x = 0, y = 10})
+                    Jimbo:add_speech_bubble('dq_1', nil, {quip = true})
+                    Jimbo:say_stuff(5)
+                    Jimbo:set_alignment{
+                        major = G.blind_select,
+                        type = 'tli',
+                        offset = {x=0.8,y=1}
+                    }
+                    G.E_MANAGER:add_event(Event({
+                        blocking = false,blockable = false,
+                        func = (function()
+                            if G.STATE ~= G.STATES.BLIND_SELECT then 
+                                if Jimbo then Jimbo:remove() end
+                                return true
+                            end end)}))
+                    return true
+                end
+            end)
+        }), 'other')
+    end
+end
+local gnb = get_new_boss
+function get_new_boss()
+    if G.GAME.round_resets.ante == G.GAME.win_ante then
+        return 'bl_banana_banana'
+    end
+    G.GAME.win_ante = G.GAME.win_ante - 1
+    local ret = gnb()
+    G.GAME.win_ante = G.GAME.win_ante + 1
+    return ret
+end
+SMODS.Blind{
+    key = "banana",
+    loc_txt = {
+        name = "The Banana",
+        text = {
+            "#1# in 6 chance to",
+            "self destruct",
+        }
+    },
+    pos = {x = 0, y = 1},
+    loc_vars = function(self, info_queue, card)
+        return {
+            vars = {G.GAME.probabilities.normal or 1}
+        }
+    end,
+    press_play = function(self)
+        if pseudorandom(pseudoseed("this is literally just russian roulette")) < G.GAME.probabilities.normal/6 then  
+            -- This definitely isn't perfect
+            -- But it's temporary anyway
+            G.FUNCS.overlay_menu{
+                definition = create_UIBox_game_over(),
+                config = {no_esc = true}
+            }
+        end
+    end,
+    boss_colour = G.C.BANAN1,
+    boss = {min = 10, max = 10},
+    in_pool = false,
+    dollars = 15,
+}
