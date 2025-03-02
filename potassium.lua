@@ -13,11 +13,11 @@ G.trollRate = 100
 SMODS.config.no_mod_badges = true
 
 
-G.localization.misc.dictionary.k_plus_stone = "+1 Banana"
+--[[G.localization.misc.dictionary.k_plus_stone = "+1 Banana"
 G.localization.misc.dictionary.k_balanced = "Bananalanced"
 G.localization.misc.dictionary.ph_you_win = "BANANA!"
 G.localization.misc.challenge_names.c_medusa_1 = "Bananadusa"
-G.localization.misc.challenge_names.c_monolith_1 = "Bananolith"
+G.localization.misc.challenge_names.c_monolith_1 = "Bananolith"]]
 
 -- Texture replacement
 SMODS.Atlas{
@@ -38,14 +38,14 @@ SMODS.Atlas{
 -- Add updates to existing Jokers
 SMODS.Joker:take_ownership('j_oops', {
     name = "Oops! All Bananas",
-    loc_txt = {
-        name = "Oops! All Bananas",
-        text = {
-            "Guarantees all {C:attention}listed",
-            "{C:green,E:1,S:1.1}probabilities",
-            "{C:inactive}(ex: {C:green}1 in 3{C:inactive} -> {C:green}inf in 3{C:inactive})",
-        }
-    },
+    --[[loc_txt = {
+		name = "Oops! All Bananas",
+		text = {
+			"Guarantees all {C:attention}listed",
+			"{C:green,E:1,S:1.1}probabilities",
+			"{C:inactive}(ex: {C:green}1 in 3{C:inactive} -> {C:green}inf in 3{C:inactive})",
+		}
+	},]]
     add_to_deck = function(self, card, from_debuff)
         G.GAME.probabilities.normal = 1e308
     end,
@@ -74,14 +74,14 @@ SMODS.Joker:take_ownership('j_matador', {
 })
 
 SMODS.Enhancement:take_ownership('m_stone', {
-    loc_txt = {
+    --[[loc_txt = {
         name = "Gros Michel",
         text = {
             "{C:mult}+#1#{} Mult",
             "{C:green}#2# in #3#{} to",
             "destroy card"
         }
-    },
+    },]]
     config = {
         extra = {
             mult = 15,
@@ -132,21 +132,21 @@ SMODS.Enhancement:take_ownership('m_stone', {
 })
 
 SMODS.Joker:take_ownership('j_marble', {
-    loc_txt = {
+    --[[loc_txt = {
         name = "Banana Farm",
         text = {
             "Adds one {C:attention}Gros Michel{}",
             "to deck when",
             "{C:attention}Blind{} is selected",
         }
-    },
+    },]]
     loc_vars = function(self, info_queue, card)
         info_queue[#info_queue+1] = G.P_CENTERS.m_stone
     end,
 })
 
 SMODS.Joker:take_ownership('j_stone', {
-    loc_txt = {
+    --[[loc_txt = {
         name = "Banana-Flavored Banana",
         text = {
             "Gives {C:chips}+#1#{} Chips for",
@@ -154,7 +154,7 @@ SMODS.Joker:take_ownership('j_stone', {
             "in your {C:attention}full deck",
             "{C:inactive}(Currently {C:chips}+#2#{C:inactive} Chips)",
         }
-    },
+    },]]
     --[[loc_vars = function(self, info_queue, card)
         info_queue[#info_queue+1] = G.P_CENTERS.m_stone
     end,--]]
@@ -176,13 +176,13 @@ SMODS.Stake:take_ownership('stake_blue', {
 -- New Content
 SMODS.Back{
     key = "banana",
-    loc_txt = {
+    --[[loc_txt = {
         name = "Banana Deck",
         text = {
             "All cards are",
             "{C:red,T:m_stone}Gros Michel{}",
         }
-    },
+    },]]
     prefix_config = {
         atlas = false
     },
@@ -328,13 +328,13 @@ function get_new_boss()
 end
 SMODS.Blind{
     key = "banana",
-    loc_txt = {
+    --[[loc_txt = {
         name = "The Banana",
         text = {
             "#1# in 6 chance to",
             "self destruct",
         }
-    },
+    },]]
     pos = {x = 0, y = 1},
     loc_vars = function(self, info_queue, card)
         return {
