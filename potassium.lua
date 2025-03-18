@@ -320,30 +320,55 @@ function get_new_boss()
     G.GAME.win_ante = G.GAME.win_ante + 1
     return ret
 end
+
+local pcfh = G.FUNCS.play_cards_from_highlighted
+function G.FUNCS.play_cards_from_highlighted(e)
+	G.GAME.before_play_buffer = true
+	G.GAME.blind:banana()
+	pcfh(e)
+	G.GAME.before_play_buffer = nil
+end
+function Blind:banana()
+	if not self.disabled then
+		local obj = self.config.blind
+		if obj.banana and type(obj.banana) == "function" then
+			return obj:banana()
+		end
+	end
+end
 SMODS.Blind{
     key = "banana",
-    --[[loc_txt = {
-        name = "The Banana",
-        text = {
-            "#1# in 6 chance to",
-            "self destruct",
-        }
-    },]]
     pos = {x = 0, y = 1},
     loc_vars = function(self, info_queue, card)
         return {
             vars = {G.GAME.probabilities.normal or 1}
         }
     end,
-    press_play = function(self)
-        if pseudorandom(pseudoseed("this is literally just russian roulette")) < G.GAME.probabilities.normal/6 then  
-            -- This definitely isn't perfect
-            -- But it's temporary anyway
-            G.FUNCS.overlay_menu{
-                definition = create_UIBox_game_over(),
-                config = {no_esc = true}
-            }
-        end
+    banana = function(self)
+        if G.jokers.cards[1] then
+			local idx = pseudorandom(pseudoseed("bananeinf"), 1, #G.jokers.cards)
+			if G.jokers.cards[idx] then
+				if G.jokers.cards[idx].config.center.immune_to_vermillion then --what? cryptid compat? no wayyyy
+					card_eval_status_text(
+						G.jokers.cards[idx],
+						"extra",
+						nil,
+						nil,
+						nil,
+						{ message = localize("k_nope_ex"), colour = G.C.JOKER_GREY }
+					)
+				else
+					_card = create_card("Joker", G.jokers, nil, nil, nil, nil, "j_gros_michel")
+					G.jokers.cards[idx]:remove_from_deck()
+					_card:add_to_deck()
+					_card:start_materialize()
+					G.jokers.cards[idx] = _card
+					_card:set_card_area(G.jokers)
+					G.jokers:set_ranks()
+					G.jokers:align_cards()
+				end
+			end
+		end
     end,
     boss_colour = G.C.BANAN1,
     boss = {min = 10, max = 10},
@@ -409,10 +434,11 @@ local c_keys = {'chips', 'h_chips', 'chip_mod',
     'emult', 'echips', 'eemult', 'eechips', 'eeemult', 'eeechips', 'hypermult', 'hyperchips',
     'Emult_mod', 'Echip_mod', 'EEmult_mod', 'EEchip_mod', 'EEEmult_mod', 'EEEchip_mod', 'hypermult_mod', 'hyperchip_mod'}
 function SMODS.calculate_effect(effect, ...)
-    ce(effect, ...)
+    local ret = ce(effect, ...)
     for _, key in ipairs(c_keys) do --scoring effects
         if effect[key] and glop then
             glop = glop + 0.01
         end
     end
+    return ret
 end
