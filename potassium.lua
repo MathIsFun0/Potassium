@@ -179,7 +179,7 @@ SMODS.Stake:take_ownership('stake_blue', {
     }
 })
 
--- ===New Content===
+-- ===Banana Content===
 SMODS.Back{
     key = "banana",
     --[[loc_txt = {
@@ -390,7 +390,7 @@ SMODS.Blind{
     atlas = "blinds",
     loc_vars = function(self, info_queue, card)
         return {
-            vars = {G.GAME.probabilities.normal or 1}
+            vars = {G.GAME and G.GAME.probabilities.normal or 1}
         }
     end,
     boss_colour = G.C.BANAN2,
@@ -456,8 +456,7 @@ function Card:calculate_joker(...)
     return ccj(self, ...)
 end
 
--- ==Glop==
-
+-- ==Glop Content==
 -- Add Glop to UI
 local cuih = create_UIBox_HUD
 function create_UIBox_HUD()
@@ -506,13 +505,22 @@ G.FUNCS.hand_glop_UI_set = function(e)
 
 -- Passive glop functionality - scales with cards triggered
 local ce = SMODS.calculate_effect
+local c_keys_p = {'chips', 'h_chips', 'chip_mod',
+    'mult', 'h_mult', 'mult_mod', 'glop'}
+local c_keys_x = {'x_chips', 'xchips', 'Xchip_mod',
+    'x_mult', 'Xmult', 'xmult', 'x_mult_mod', 'Xmult_mod', 'xglop'}
+local c_keys_e = {'e_mult', 'e_chips', 'emult', 'echips','Emult_mod', 'Echip_mod', 'eglop'}
+local c_keys_ee = {'ee_mult', 'ee_chips', 'eemult', 'eechips','EEmult_mod', 'EEchip_mod',
+                    'eee_mult', 'eee_chips', 'eeemult', 'eeechips','EEEmult_mod', 'EEEchip_mod',
+                    'hyper_mult', 'hyper_chips', 'hypermult', 'hyperchips','hypermult_mod', 'hyperchip_mod'}
 local c_keys = {'chips', 'h_chips', 'chip_mod',
     'mult', 'h_mult', 'mult_mod',
     'x_chips', 'xchips', 'Xchip_mod',
     'x_mult', 'Xmult', 'xmult', 'x_mult_mod', 'Xmult_mod',
     'e_mult', 'e_chips', 'ee_mult', 'ee_chips', 'eee_mult', 'eee_chips', 'hyper_mult', 'hyper_chips',
     'emult', 'echips', 'eemult', 'eechips', 'eeemult', 'eeechips', 'hypermult', 'hyperchips',
-    'Emult_mod', 'Echip_mod', 'EEmult_mod', 'EEchip_mod', 'EEEmult_mod', 'EEEchip_mod', 'hypermult_mod', 'hyperchip_mod'}
+    'Emult_mod', 'Echip_mod', 'EEmult_mod', 'EEchip_mod', 'EEEmult_mod', 'EEEchip_mod', 'hypermult_mod', 'hyperchip_mod',
+    'glop', 'xglop', 'eglop'}
 function SMODS.calculate_effect(effect, ...)
     local ret = ce(effect, ...)
     for _, key in ipairs(c_keys) do --scoring effects
@@ -520,6 +528,137 @@ function SMODS.calculate_effect(effect, ...)
             glop = glop + 0.01
         end
     end
+    return ret
+end
+
+for _, v in ipairs({'glop', 'xglop', 'eglop'}) do
+    table.insert(SMODS.calculation_keys, v)
+end
+
+local cie = SMODS.calculate_individual_effect
+function SMODS.calculate_individual_effect(effect, scored_card, key, amount, from_edition)
+    local ret = cie(effect, scored_card, key, amount, from_edition)
+    if ret then return ret end
+
+    if key == 'glop' and amount ~= 0 then 
+        if effect.card then juice_card(effect.card) end
+        glop = glop + amount
+        update_hand_text({delay = 0}, {chips = hand_chips, mult = mult, glop = glop})
+        if not effect.remove_default_message then
+            card_eval_status_text(scored_card, 'jokers', nil, percent, nil, {message = "+"..amount.." Glop", colour =  G.C.GLOP, edition = from_edition})
+        end
+        return true
+    end
+
+    if key == 'xglop' and amount ~= 1 then 
+        if effect.card then juice_card(effect.card) end
+        glop = glop * amount
+        update_hand_text({delay = 0}, {chips = hand_chips, mult = mult, glop = glop})
+        if not effect.remove_default_message then
+            card_eval_status_text(scored_card, 'jokers', nil, percent, nil, {message = "X"..amount.." Glop", colour =  G.C.GLOP, edition = from_edition})
+        end
+        return true
+    end
+    
+    if key == 'eglop' and amount ~= 1 then 
+        if effect.card then juice_card(effect.card) end
+        glop = glop ^ amount
+        update_hand_text({delay = 0}, {chips = hand_chips, mult = mult, glop = glop})
+        if not effect.remove_default_message then
+            card_eval_status_text(scored_card, 'jokers', nil, percent, nil, {message = "^"..amount.." Glop", colour =  G.C.GLOP, edition = from_edition})
+        end
+        return true
+    end
+end
+
+local lc = loc_colour
+function loc_colour(_c, _default)
+	if not G.ARGS.LOC_COLOURS then
+		lc()
+	end
+	G.ARGS.LOC_COLOURS.glop = G.C.GLOP
+	return lc(_c, _default)
+end
+
+-- Glop Content
+SMODS.Joker{
+	key = "glopbucket",
+	pos = { x = 0, y = 0 },
+	config = { extra = { extra = 0.01, glop = 0 } },
+	rarity = 2,
+	cost = 7,
+	perishable_compat = false,
+	blueprint_compat = true,
+	loc_vars = function(self, info_queue, center)
+		return { vars = { center.ability.extra.extra, center.ability.extra.glop } }
+	end,
+	calculate = function(self, card, context)
+		if context.joker_main and card.ability.extra.glop > 0 then
+			return {
+				glop = card.ability.extra.glop,
+			}
+		end
+		if context.cardarea == G.play and context.individual and not context.blueprint then
+			card.ability.extra.glop = card.ability.extra.glop + card.ability.extra.extra
+			return {
+				extra = { focus = card, message = localize("k_upgrade_ex") },
+				card = card,
+				colour = G.C.GLOP,
+			}
+		end
+	end,
+}
+
+SMODS.Shader{
+    key = "glop",
+    path = "glop.fs"
+}
+
+SMODS.Edition{
+    key = "glop",
+    shader = "glop",
+    pos = {x = 7, y = 6},
+    calculate = function(self, card, context)
+        if context.post_trigger and context.other_card == card and context.other_ret then
+            local _glop = 0
+            local _xglop = 1
+            local _eglop = 1
+            for m, _ in pairs(context.other_ret) do
+                for _, k in ipairs(c_keys_p) do
+                    if context.other_ret[m][k] then
+                        _glop = _glop + context.other_ret[m][k]/10^(math.floor(math.log(tonumber(context.other_ret[m][k]), 10))+1)
+                    end
+                end
+                for _, k in ipairs(c_keys_x) do
+                    if context.other_ret[m][k] then
+                        _glop = _glop + context.other_ret[m][k]
+                    end
+                end
+                for _, k in ipairs(c_keys_e) do
+                    if context.other_ret[m][k] then
+                        _xglop = _xglop + context.other_ret[m][k]
+                    end
+                end
+                for _, k in ipairs(c_keys_ee) do
+                    if context.other_ret[m][k] then
+                        _eglop = _eglop + context.other_ret[m][k]
+                    end
+                end
+            end
+            return {
+                glop = _glop,
+                xglop = _xglop,
+                eglop = _eglop,
+            }
+        end
+    end
+}
+
+-- ==Misc UI Changes==
+local nf = number_format
+function number_format(...)
+    local ret = nf(...)
+    if (ret == "naneinf" or ret == "Infinity") then return "bananeinf" end
     return ret
 end
 

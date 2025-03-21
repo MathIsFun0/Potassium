@@ -51,6 +51,24 @@ return {
 					"{C:inactive}(Currently {C:chips}+#2#{C:inactive} Chips)",
 				}
 			},
+			j_banana_glopbucket = {
+				name = "A Glop in the Bucket",
+				text = {
+					"This Joker gains",
+					"{C:glop}+#1#{} Glop when each",
+					"played {C:attention}card{} is scored",
+					"{C:inactive}(Currently {C:glop}+#2#{C:inactive} Glop)",
+				}
+			}
+		},
+		Edition = {
+			e_banana_glop = {
+				name = "Glop",
+				text = {
+					"Scoring effects",
+					"also give {C:glop}Glop"
+				}
+			}
 		},
 		Enhanced = {
 			m_stone = {
@@ -80,6 +98,9 @@ return {
 			k_plus_stone = "+1 Banana",
 			k_balanced = "Bananalanced",
 			ph_you_win = "BANANA!",
+		},
+		labels = {
+			banana_glop = "Glop",
 		}
 	}
 }
