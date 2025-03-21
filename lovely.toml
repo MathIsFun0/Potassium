@@ -323,3 +323,22 @@ pattern = '''e.config.object.scale = scale_number(G.GAME.current_round.current_h
 position = "at"
 payload = '''e.config.object.scale = scale_number(G.GAME.current_round.current_hand.chips, 0.69, 1000)'''
 match_indent = true
+
+# Add credits tab
+[[patches]]
+[patches.pattern]
+target = "functions/UI_definitions.lua"
+pattern = '''end,
+            },
+        },
+        snap_to_nav = true}),'''
+position = "at"
+payload = '''end,
+            },
+            {
+                label = "Banana",
+                tab_definition_function = banana_credits
+            }
+        },
+        snap_to_nav = true}),'''
+match_indent = true

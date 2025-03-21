@@ -10,13 +10,20 @@ return {
 			},
 		},
 		Blind = {
-			bl_banana_banana = {
-				name = "Bananarama",
+			bl_banana_banana1 = {
+				name = "The Banana",
 				text = {
 					"One random Joker replaced",
 					"with Gros Michel every hand",
 				}
-			}
+			},
+			bl_banana_banana2 = {
+				name = "The Peel",
+				text = {
+					"#1# in 6 chance for Jokers to",
+					"go extinct when triggered",
+				}
+			},
 		},
 		Joker = {
 			j_oops = {

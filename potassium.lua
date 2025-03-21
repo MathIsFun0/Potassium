@@ -12,8 +12,12 @@ G.trollRate = 100
 
 SMODS.config.no_mod_badges = true
 
+SMODS.current_mod.optional_features = {
+    post_trigger = true
+}
 
--- ===Texture replacement===
+
+-- ===Texture replacement and new Atlases===
 SMODS.Atlas{
     key = "centers",
     path = "Enhancers.png",
@@ -27,6 +31,14 @@ SMODS.Atlas{
     px = 71,
     py = 95,
     raw_key = true
+}
+SMODS.Atlas{
+    key = "blinds",
+	atlas_table = "ANIMATION_ATLAS",
+	path = "blinds.png",
+	px = 34,
+	py = 34,
+	frames = 21,
 }
 
 -- ===Add updates to existing Jokers===
@@ -313,7 +325,7 @@ end
 local gnb = get_new_boss
 function get_new_boss()
     if G.GAME.round_resets.ante == G.GAME.win_ante then
-        return 'bl_banana_banana'
+        return 'bl_banana_banana'..pseudorandom(pseudoseed("bananboss"),1,2)
     end
     G.GAME.win_ante = G.GAME.win_ante - 1
     local ret = gnb()
@@ -337,13 +349,9 @@ function Blind:banana()
 	end
 end
 SMODS.Blind{
-    key = "banana",
-    pos = {x = 0, y = 1},
-    loc_vars = function(self, info_queue, card)
-        return {
-            vars = {G.GAME.probabilities.normal or 1}
-        }
-    end,
+    key = "banana1",
+    pos = {x = 0, y = 0},
+    atlas = "blinds",
     banana = function(self)
         if G.jokers.cards[1] then
 			local idx = pseudorandom(pseudoseed("bananeinf"), 1, #G.jokers.cards)
@@ -375,6 +383,78 @@ SMODS.Blind{
     in_pool = false,
     dollars = 15,
 }
+
+SMODS.Blind{
+    key = "banana2",
+    pos = {x = 0, y = 0},
+    atlas = "blinds",
+    loc_vars = function(self, info_queue, card)
+        return {
+            vars = {G.GAME.probabilities.normal or 1}
+        }
+    end,
+    boss_colour = G.C.BANAN2,
+    boss = {min = 10, max = 10},
+    in_pool = false,
+    dollars = 15,
+    calculate = function(self, card, context)
+        if
+			context.post_trigger
+			and context.other_card --animation-wise this looks weird sometimes
+		then
+            if
+                not context.other_card.ability.eternal
+                and (
+                    pseudorandom(pseudoseed("go_extinct"))
+                    < G.GAME.probabilities.normal / 6
+                )
+            then
+                context.other_card.extinct = true
+                -- this event call might need to be pushed later to make more sense
+                G.E_MANAGER:add_event(Event({
+                    func = function()
+                        play_sound('tarot1')
+                        context.other_card.T.r = -0.2
+                        context.other_card:juice_up(0.3, 0.4)
+                        context.other_card.states.drag.is = true
+                        context.other_card.children.center.pinch.x = true
+                        G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.3, blockable = false,
+                            func = function()
+                                    G.jokers:remove_card(context.other_card)
+                                    context.other_card:remove()
+                                    context.other_card = nil
+                                return true; end})) 
+                        return true
+                    end
+                })) 
+                if context.other_card.ability.name == 'Gros Michel' then 
+                    G.GAME.pool_flags.gros_michel_extinct = true
+                else
+                    if not G.GAME.banned_keys then
+                        G.GAME.banned_keys = {}
+                    end
+                    G.GAME.banned_keys[context.other_card.config.center.key] = true
+                end
+                return {
+                    message = localize('k_extinct_ex'),
+                    message_card = context.other_card
+                }
+            else
+                return {
+                    message = localize('k_safe_ex'),
+                    message_card = context.other_card
+                }
+            end
+        end
+    end
+}
+
+-- Don't trigger extinct cards
+local ccj = Card.calculate_joker
+function Card:calculate_joker(...)
+    if self.extinct then return end
+    return ccj(self, ...)
+end
 
 -- ==Glop==
 
@@ -441,4 +521,63 @@ function SMODS.calculate_effect(effect, ...)
         end
     end
     return ret
+end
+
+-- ===Credits===
+function banana_credits()
+    local text_scale = 0.8
+    return {n=G.UIT.ROOT, config={align = "cm", padding = 0.2, colour = G.C.BLACK, r = 0.1, emboss = 0.05, minh = 6, minw = 6}, nodes={
+        {n=G.UIT.R, config={align = "cm", padding = 0.1,outline_colour = G.C.JOKER_GREY, r = 0.1, outline = 1}, nodes={
+          {n=G.UIT.R, config={align = "cm", padding = 0}, nodes={
+            {n=G.UIT.T, config={text = "Programmed by MathIsFun_", scale = text_scale*0.6, colour = G.C.WHITE, shadow = true}},
+          }},
+        }},
+        {n=G.UIT.R, config={align = "cm", padding = 0.1,outline_colour = G.C.JOKER_GREY, r = 0.1, outline = 1}, nodes={
+          {n=G.UIT.R, config={align = "cm", padding = 0}, nodes={
+            {n=G.UIT.T, config={text = "Contributors", scale = text_scale*0.6, colour = G.C.BANAN1, shadow = true}},
+          }},
+          {n=G.UIT.R, config={align = "tm", padding = 0}, nodes={
+            {n=G.UIT.C, config={align = "tl", padding = 0.05, minw = 2.5}, nodes={
+              {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
+                {n=G.UIT.T, config={text = 'firz.io', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
+              }},
+              {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
+                {n=G.UIT.T, config={text = 'zedruu_the_goat', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
+              }},
+              {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
+                {n=G.UIT.T, config={text = 'vexastrae', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
+              }},
+              {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
+                {n=G.UIT.T, config={text = 'playerrWon', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
+              }},
+              {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
+                {n=G.UIT.T, config={text = 'Mysthaps', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
+              }},
+              {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
+                {n=G.UIT.T, config={text = 'Foegro', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
+              }},
+            }},
+            {n=G.UIT.C, config={align = "tl", padding = 0.05, minw = 2.5}, nodes={
+                {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
+                {n=G.UIT.T, config={text = 'Crimson Heart', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
+                }},
+                {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
+                {n=G.UIT.T, config={text = 'Squiddy', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
+                }},
+                {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
+                {n=G.UIT.T, config={text = 'Dragokillfist', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
+                }},
+                {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
+                {n=G.UIT.T, config={text = 'Jevonn', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
+                }},
+            {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
+                {n=G.UIT.T, config={text = 'cassknows', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
+              }},
+              {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
+                  {n=G.UIT.T, config={text = 'ori', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
+                }},
+            }},
+          }},
+        }}
+      }}
 end
