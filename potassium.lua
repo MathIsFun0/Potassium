@@ -33,6 +33,13 @@ SMODS.Atlas{
     raw_key = true
 }
 SMODS.Atlas{
+    key = "balatro",
+    path = "title.png",
+    px = 333,
+    py = 216,
+    raw_key = true
+}
+SMODS.Atlas{
     key = "blinds",
 	atlas_table = "ANIMATION_ATLAS",
 	path = "blinds.png",
@@ -71,7 +78,7 @@ SMODS.Joker:take_ownership('j_matador', {
     end,
     calculate = function(self, card, context)
         -- add context.joker_main if this is too OP
-        if G.GAME.blind and G.GAME.blind.boss and context.cardarea == G.jokers then
+        if G.GAME.blind and G.GAME.blind.boss and context.cardarea == G.jokers and not context.destroy_card and not context.destroying_card then
             return {
                 dollars = card.ability.extra
             }
@@ -678,7 +685,7 @@ function banana_credits()
           {n=G.UIT.R, config={align = "tm", padding = 0}, nodes={
             {n=G.UIT.C, config={align = "tl", padding = 0.05, minw = 2.5}, nodes={
               {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
-                {n=G.UIT.T, config={text = 'firz.io', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
+                {n=G.UIT.T, config={text = 'firz', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
               }},
               {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
                 {n=G.UIT.T, config={text = 'zedruu_the_goat', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
@@ -694,6 +701,9 @@ function banana_credits()
               }},
               {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
                 {n=G.UIT.T, config={text = 'Foegro', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
+              }},
+              {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
+                {n=G.UIT.T, config={text = 'pannella', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
               }},
             }},
             {n=G.UIT.C, config={align = "tl", padding = 0.05, minw = 2.5}, nodes={
@@ -715,6 +725,9 @@ function banana_credits()
               {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
                   {n=G.UIT.T, config={text = 'ori', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
                 }},
+              {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
+                {n=G.UIT.T, config={text = 'unexian', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
+              }},
             }},
           }},
         }}
