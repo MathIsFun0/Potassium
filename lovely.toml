@@ -403,6 +403,23 @@ G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.9, func = function()
     return true end }))'''
 match_indent = true
 
+# Glop in win screen
+[[patches]]
+[patches.pattern]
+target = "functions/UI_definitions.lua"
+pattern = '''create_UIBox_round_scores_row('new_collection', G.C.WHITE),'''
+position = "at"
+payload = '''create_UIBox_round_scores_row('best_glop', G.C.GLOP),'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "functions/state_events.lua"
+pattern = '''check_and_set_high_score('hand', hand_chips*mult)'''
+position = "after"
+payload = '''check_and_set_high_score('best_glop', glop)'''
+match_indent = true
+
 # Add credits tab
 [[patches]]
 [patches.pattern]

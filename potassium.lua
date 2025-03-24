@@ -295,12 +295,22 @@ local gigo = Game.init_game_object
 function Game:init_game_object()
     local ret = gigo(self)
     ret.win_ante = ret.win_ante + 2
+    ret.round_scores.best_glop = {label = "Best Glop", amt = 0}
     for k, v in pairs(ret.hands) do
         v.glop = to_big(1)
         v.s_glop = to_big(1)
         v.l_glop = v.l_mult * 0.01
     end
     return ret
+end
+
+local cashs = check_and_set_high_score
+function check_and_set_high_score(score, amt)
+    if score ~= "best_glop" then return cashs(score, amt) end
+    if not amt or not is_number(amt) then return end
+    if G.GAME.round_scores[score] and to_big(amt) > to_big(G.GAME.round_scores[score].amt or 0) then
+        G.GAME.round_scores[score].amt = amt
+    end
 end
 
 local cuichr = create_UIBox_current_hand_row
