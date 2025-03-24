@@ -134,9 +134,14 @@ return {
 			k_plus_stone = "+1 Banana",
 			k_balanced = "Bananalanced",
 			ph_you_win = "BANANA!",
+			ph_score_best_glop = "Best Glop",
+			cry_hand_bulwark = "Bananawark",
 		},
 		labels = {
 			banana_glop = "Glop",
-		}
+		},
+		poker_hands = {
+			["cry_Bulwark"] = "Bananawark",
+		},
 	}
 }

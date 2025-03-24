@@ -164,7 +164,15 @@ match_indent = true
 target = "functions/state_events.lua"
 pattern = '''hand_chips = mod_chips(G.GAME.hands[text].chips)'''
 position = "after"
-payload = '''glop = 1'''
+payload = '''glop = G.GAME.hands[text].glop'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "functions/state_events.lua"
+pattern = '''hand_chips = mod_chips(Cryptid.ascend(G.GAME.hands[text].chips))'''
+position = "after"
+payload = '''glop = Cryptid.ascend(G.GAME.hands[text].glop)'''
 match_indent = true
 
 # glop UI (very real)
@@ -203,6 +211,14 @@ match_indent = true
 
 [[patches]]
 [patches.pattern]
+target = "cardarea.lua"
+pattern = '''update_hand_text({immediate = true, nopulse = true, delay = 0}, {mult = 0, chips = 0, level = '', handname = ''})'''
+position = "at"
+payload = '''update_hand_text({immediate = true, nopulse = true, delay = 0}, {mult = 0, chips = 0, glop = 0, level = '', handname = ''})'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
 target = "card.lua"
 pattern = '''update_hand_text({sound = 'button', volume = 0.7, pitch = 1.1, delay = 0}, {mult = 0, chips = 0, handname = '', level = ''})'''
 position = "at"
@@ -230,7 +246,7 @@ match_indent = true
 target = "card.lua"
 pattern = '''update_hand_text({sound = 'button', volume = 0.7, pitch = 0.8, delay = 0.3}, {handname=localize(self.ability.consumeable.hand_type, 'poker_hands'),chips = G.GAME.hands[self.ability.consumeable.hand_type].chips, mult = G.GAME.hands[self.ability.consumeable.hand_type].mult, level=G.GAME.hands[self.ability.consumeable.hand_type].level})'''
 position = "at"
-payload = '''update_hand_text({sound = 'button', volume = 0.7, pitch = 0.8, delay = 0.3}, {handname=localize(self.ability.consumeable.hand_type, 'poker_hands'),chips = G.GAME.hands[self.ability.consumeable.hand_type].chips, mult = G.GAME.hands[self.ability.consumeable.hand_type].mult, glop = 1, level=G.GAME.hands[self.ability.consumeable.hand_type].level})'''
+payload = '''update_hand_text({sound = 'button', volume = 0.7, pitch = 0.8, delay = 0.3}, {handname=localize(self.ability.consumeable.hand_type, 'poker_hands'),chips = G.GAME.hands[self.ability.consumeable.hand_type].chips, mult = G.GAME.hands[self.ability.consumeable.hand_type].mult, glop = G.GAME.hands[self.ability.consumeable.hand_type].glop, level=G.GAME.hands[self.ability.consumeable.hand_type].level})'''
 match_indent = true
 
 [[patches]]
@@ -238,7 +254,7 @@ match_indent = true
 target = "card.lua"
 pattern = '''update_hand_text({sound = 'button', volume = 0.7, pitch = 0.8, delay = 0.3}, {handname=localize(text, 'poker_hands'),chips = G.GAME.hands[text].chips, mult = G.GAME.hands[text].mult, level=G.GAME.hands[text].level})'''
 position = "at"
-payload = '''update_hand_text({sound = 'button', volume = 0.7, pitch = 0.8, delay = 0.3}, {handname=localize(text, 'poker_hands'),chips = G.GAME.hands[text].chips, mult = G.GAME.hands[text].mult, glop = 1, level=G.GAME.hands[text].level})'''
+payload = '''update_hand_text({sound = 'button', volume = 0.7, pitch = 0.8, delay = 0.3}, {handname=localize(text, 'poker_hands'),chips = G.GAME.hands[text].chips, mult = G.GAME.hands[text].mult, glop = G.GAME.hands[text].glop, level=G.GAME.hands[text].level})'''
 match_indent = true
 
 [[patches]]
@@ -254,7 +270,15 @@ match_indent = true
 target = "cardarea.lua"
 pattern = '''update_hand_text({immediate = true, nopulse = nil, delay = 0}, {handname=disp_text, level=G.GAME.hands[text].level, mult = G.GAME.hands[text].mult, chips = G.GAME.hands[text].chips})'''
 position = "at"
-payload = '''update_hand_text({immediate = true, nopulse = nil, delay = 0}, {handname=disp_text, level=G.GAME.hands[text].level, mult = G.GAME.hands[text].mult, chips = G.GAME.hands[text].chips, glop = 1})'''
+payload = '''update_hand_text({immediate = true, nopulse = nil, delay = 0}, {handname=disp_text, level=G.GAME.hands[text].level, mult = G.GAME.hands[text].mult, chips = G.GAME.hands[text].chips, glop = G.GAME.hands[text].glop})'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "cardarea.lua"
+pattern = '''update_hand_text({immediate = true, nopulse = nil, delay = 0}, {handname=disp_text, level=G.GAME.hands[text].level, mult = Cryptid.ascend(G.GAME.hands[text].mult), chips = Cryptid.ascend(G.GAME.hands[text].chips)})'''
+position = "at"
+payload = '''update_hand_text({immediate = true, nopulse = nil, delay = 0}, {handname=disp_text, level=G.GAME.hands[text].level, mult = Cryptid.ascend(G.GAME.hands[text].mult), chips = Cryptid.ascend(G.GAME.hands[text].chips), glop = Cryptid.ascend(G.GAME.hands[text].glop)})'''
 match_indent = true
 
 [[patches]]
@@ -262,7 +286,7 @@ match_indent = true
 target = "tag.lua"
 pattern = '''mult = G.GAME.hands[self.ability.orbital_hand].mult,'''
 position = "after"
-payload = '''glop = 1,'''
+payload = '''glop = G.GAME.hands[self.ability.orbital_hand].glop,'''
 match_indent = true
 
 [[patches]]
@@ -286,7 +310,23 @@ match_indent = true
 target = "functions/state_events.lua"
 pattern = '''delay = G.GAME.current_round.current_hand.handname ~= disp_text and 0.4 or 0}, {handname=disp_text, level=G.GAME.hands[text].level, mult = G.GAME.hands[text].mult, chips = G.GAME.hands[text].chips})'''
 position = "at"
-payload = '''delay = G.GAME.current_round.current_hand.handname ~= disp_text and 0.4 or 0}, {handname=disp_text, level=G.GAME.hands[text].level, mult = G.GAME.hands[text].mult, chips = G.GAME.hands[text].chips, glop = 1})'''
+payload = '''delay = G.GAME.current_round.current_hand.handname ~= disp_text and 0.4 or 0}, {handname=disp_text, level=G.GAME.hands[text].level, mult = G.GAME.hands[text].mult, chips = G.GAME.hands[text].chips, glop = G.GAME.hands[text].glop})'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "functions/state_events.lua"
+pattern = '''delay = G.GAME.current_round.current_hand.handname ~= disp_text and 0.4 or 0}, {handname=disp_text, level=G.GAME.hands[text].level, mult = Cryptid.ascend(G.GAME.hands[text].mult), chips = Cryptid.ascend(G.GAME.hands[text].chips)})'''
+position = "at"
+payload = '''delay = G.GAME.current_round.current_hand.handname ~= disp_text and 0.4 or 0}, {handname=disp_text, level=G.GAME.hands[text].level, mult = Cryptid.ascend(G.GAME.hands[text].mult), chips = Cryptid.ascend(G.GAME.hands[text].chips), glop = Cryptid.ascend(G.GAME.hands[text].glop)})'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "functions/state_events.lua"
+pattern = '''func = (function()  update_hand_text({delay = 0, immediate = true}, {mult = 0, chips = 0, chip_total = G.GAME.blind.cry_cap_score and G.GAME.blind:cry_cap_score(math.floor(hand_chips*mult)) or math.floor(hand_chips*mult), level = '', handname = ''});play_sound('button', 0.9, 0.6);return true end)'''
+position = "at"
+payload = '''func = (function()  update_hand_text({delay = 0, immediate = true}, {mult = 0, chips = 0, glop = 0, chip_total = G.GAME.blind.cry_cap_score and G.GAME.blind:cry_cap_score(math.floor(hand_chips*mult)) or math.floor(hand_chips*mult), level = '', handname = ''});play_sound('button', 0.9, 0.6);return true end)'''
 match_indent = true
 
 [[patches]]
@@ -303,7 +343,7 @@ match_indent = true
 target = "functions/misc_functions.lua"
 pattern = '''G.ARGS.score_intensity.earned_score = G.GAME.current_round.current_hand.chips*G.GAME.current_round.current_hand.mult'''
 position = "at"
-payload = '''G.ARGS.score_intensity.earned_score = G.GAME.current_round.current_hand.chips*G.GAME.current_round.current_hand.mult*G.GAME.current_round.current_hand.glop'''
+payload = '''G.ARGS.score_intensity.earned_score = is_number(G.GAME.current_round.current_hand.glop) and G.GAME.current_round.current_hand.chips*G.GAME.current_round.current_hand.mult*G.GAME.current_round.current_hand.glop or 0'''
 match_indent = true
 
 # Make chip and mult stay at the current scale
@@ -322,6 +362,45 @@ target = "functions/button_callbacks.lua"
 pattern = '''e.config.object.scale = scale_number(G.GAME.current_round.current_hand.chips, 0.9, 1000)'''
 position = "at"
 payload = '''e.config.object.scale = scale_number(G.GAME.current_round.current_hand.chips, 0.69, 1000)'''
+match_indent = true
+
+# glop planet loc
+[[patches]]
+[patches.pattern]
+target = "functions/common_events.lua"
+pattern = '''G.GAME.hands[cfg.hand_type].level,localize(cfg.hand_type, 'poker_hands'), G.GAME.hands[cfg.hand_type].l_mult, G.GAME.hands[cfg.hand_type].l_chips,'''
+position = "at"
+payload = '''G.GAME.hands[cfg.hand_type].level,localize(cfg.hand_type, 'poker_hands'), G.GAME.hands[cfg.hand_type].l_mult, G.GAME.hands[cfg.hand_type].l_chips, G.GAME.hands[cfg.hand_type].l_glop,'''
+match_indent = true
+
+# glop planet level stuff
+[[patches]]
+[patches.pattern]
+target = "functions/common_events.lua"
+pattern = '''G.GAME.hands[hand].chips = math.max(G.GAME.hands[hand].s_chips + G.GAME.hands[hand].l_chips*(G.GAME.hands[hand].level - 1), 0)'''
+position = "after"
+payload = '''G.GAME.hands[hand].glop = math.max(G.GAME.hands[hand].s_glop + G.GAME.hands[hand].l_glop*(G.GAME.hands[hand].level - 1), 0)'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "functions/common_events.lua"
+pattern = '''G.GAME.hands[hand].chips = math.max(G.GAME.hands[hand].chips + G.GAME.hands[hand].l_chips*amount, 1)'''
+position = "after"
+payload = '''G.GAME.hands[hand].glop = math.max(G.GAME.hands[hand].glop + G.GAME.hands[hand].l_glop*amount, 1)'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "functions/common_events.lua"
+pattern = '''update_hand_text({sound = 'button', volume = 0.7, pitch = 0.9, delay = 0}, {level=G.GAME.hands[hand].level})'''
+position = "before"
+payload = '''update_hand_text({delay = 0}, {glop = Cryptid and Cryptid.ascend and Cryptid.ascend(G.GAME.hands[hand].glop) or G.GAME.hands[hands].glop, StatusText = true})
+G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.9, func = function()
+    play_sound('tarot1')
+    if card then card:juice_up(0.8, 0.5) end
+    G.TAROT_INTERRUPT_PULSE = nil
+    return true end }))'''
 match_indent = true
 
 # Add credits tab

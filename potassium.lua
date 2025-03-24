@@ -16,6 +16,12 @@ SMODS.current_mod.optional_features = {
     post_trigger = true
 }
 
+if not to_big then
+    function to_big(x) return x end
+end
+if not is_number then
+    function is_number(x) return type(x) == 'number' end
+end
 
 -- ===Texture replacement and new Atlases===
 SMODS.Atlas{
@@ -102,6 +108,7 @@ SMODS.Enhancement:take_ownership('m_stone', {
         }
     },
     replace_base_card = true,
+    no_edeck = true,
     loc_vars = function(self, info_queue, card)
         return { vars = {
             card.ability.extra.mult or self.config.extra.mult,
@@ -288,6 +295,38 @@ local gigo = Game.init_game_object
 function Game:init_game_object()
     local ret = gigo(self)
     ret.win_ante = ret.win_ante + 2
+    for k, v in pairs(ret.hands) do
+        v.glop = to_big(1)
+        v.s_glop = to_big(1)
+        v.l_glop = v.l_mult * 0.01
+    end
+    return ret
+end
+
+local cuichr = create_UIBox_current_hand_row
+function create_UIBox_current_hand_row(handname, simple)
+    local ret = cuichr(handname, simple)
+    if ret and not simple then
+        ret.nodes[2] = {n=G.UIT.C, config={align = "cm", padding = 0.05, colour = G.C.BLACK,r = 0.1}, nodes={
+            {n=G.UIT.C, config={align = "cm", padding = 0.01, r = 0.1, colour = G.C.CHIPS, minw = 1.1}, nodes={
+              {n=G.UIT.B, config={w = 0.04,h = 0.01}},
+              {n=G.UIT.T, config={text = number_format(G.GAME.hands[handname].chips, 1000000), scale = 0.45, colour = G.C.UI.TEXT_LIGHT}},
+              {n=G.UIT.B, config={w = 0.04,h = 0.01}},
+            }},
+            {n=G.UIT.T, config={text = "X", scale = 0.45, colour = G.C.MULT}},
+            {n=G.UIT.C, config={align = "cm", padding = 0.01, r = 0.1, colour = G.C.MULT, minw = 1.1}, nodes={
+              {n=G.UIT.B, config={w = 0.04,h = 0.01}},
+              {n=G.UIT.T, config={text = number_format(G.GAME.hands[handname].mult, 1000000), scale = 0.45, colour = G.C.UI.TEXT_LIGHT}},
+              {n=G.UIT.B, config={w = 0.04,h = 0.01}},
+            }},
+            {n=G.UIT.T, config={text = "X", scale = 0.45, colour = G.C.MULT}},
+            {n=G.UIT.C, config={align = "cm", padding = 0.01, r = 0.1, colour = G.C.GLOP, minw = 1.1}, nodes={
+              {n=G.UIT.B, config={w = 0.04,h = 0.01}},
+              {n=G.UIT.T, config={text = number_format(G.GAME.hands[handname].glop, 1000000), scale = 0.45, colour = G.C.UI.TEXT_LIGHT}},
+              {n=G.UIT.B, config={w = 0.04,h = 0.01}},
+            }},
+          }}
+    end
     return ret
 end
 
@@ -552,7 +591,7 @@ function SMODS.calculate_individual_effect(effect, scored_card, key, amount, fro
         glop = glop + amount
         update_hand_text({delay = 0}, {chips = hand_chips, mult = mult, glop = glop})
         if not effect.remove_default_message then
-            card_eval_status_text(scored_card, 'jokers', nil, percent, nil, {message = "+"..amount.." Glop", colour =  G.C.GLOP, edition = from_edition})
+            card_eval_status_text(scored_card, 'jokers', nil, percent, nil, {message = "+"..amount.." Glop", colour =  G.C.GLOP})
         end
         return true
     end
@@ -562,7 +601,7 @@ function SMODS.calculate_individual_effect(effect, scored_card, key, amount, fro
         glop = glop * amount
         update_hand_text({delay = 0}, {chips = hand_chips, mult = mult, glop = glop})
         if not effect.remove_default_message then
-            card_eval_status_text(scored_card, 'jokers', nil, percent, nil, {message = "X"..amount.." Glop", colour =  G.C.GLOP, edition = from_edition})
+            card_eval_status_text(scored_card, 'jokers', nil, percent, nil, {message = "X"..amount.." Glop", colour =  G.C.GLOP})
         end
         return true
     end
@@ -572,7 +611,7 @@ function SMODS.calculate_individual_effect(effect, scored_card, key, amount, fro
         glop = glop ^ amount
         update_hand_text({delay = 0}, {chips = hand_chips, mult = mult, glop = glop})
         if not effect.remove_default_message then
-            card_eval_status_text(scored_card, 'jokers', nil, percent, nil, {message = "^"..amount.." Glop", colour =  G.C.GLOP, edition = from_edition})
+            card_eval_status_text(scored_card, 'jokers', nil, percent, nil, {message = "^"..amount.." Glop", colour =  G.C.GLOP})
         end
         return true
     end
@@ -585,6 +624,76 @@ function loc_colour(_c, _default)
 	end
 	G.ARGS.LOC_COLOURS.glop = G.C.GLOP
 	return lc(_c, _default)
+end
+
+-- Glop Planet Levels
+local generic_planet_loc = {
+    "{S:0.8}({S:0.8,V:1}lvl.#1#{S:0.8}){} Level up",
+    "{C:attention}#2#",
+    "{C:mult}+#3#{} Mult and",
+    "{C:chips}+#4#{} chips",
+}
+local generic_planet_loc_cryptid = {
+    "{S:0.8}({S:0.8,V:1}lvl.#1#{S:0.8}){} Level up",
+    "{C:attention}#2#",
+    "{C:mult}+#3#{} Mult and",
+    "{C:chips}+#4#{} chip#<s>4#",
+}
+local glop_planet_loc = {
+    "{S:0.8}({S:0.8,V:1}lvl.#1#{S:0.8}){} Level up",
+    "{C:attention}#2#",
+    "{C:mult}+#3#{} Mult and",
+    "{C:chips}+#4#{} Chips and",
+    "{C:glop}+#5#{} Glop",
+}
+local planet_taken_ownership = {}
+local function parse_loc_txt(center)
+	center.text_parsed = {}
+	if center.text then
+		for _, line in ipairs(center.text) do
+			center.text_parsed[#center.text_parsed + 1] = loc_parse_string(line)
+		end
+		center.name_parsed = {}
+		for _, line in ipairs(type(center.name) == "table" and center.name or { center.name }) do
+			center.name_parsed[#center.name_parsed + 1] = loc_parse_string(line)
+		end
+		if center.unlock then
+			center.unlock_parsed = {}
+			for _, line in ipairs(center.unlock) do
+				center.unlock_parsed[#center.unlock_parsed + 1] = loc_parse_string(line)
+			end
+		end
+	end
+end
+local il = init_localization
+function init_localization()
+    il()
+    for k, v in pairs(G.localization.descriptions.Planet) do
+        if #v.text == 4 then
+            local gloppable = true
+            for i = 1, 4 do
+                if v.text[i] ~= generic_planet_loc[i] and v.text[i] ~= generic_planet_loc_cryptid[i] then
+                    gloppable = false
+                    break
+                end
+            end
+            if gloppable then
+                v.text = glop_planet_loc
+                parse_loc_txt(v)
+                if not planet_taken_ownership[k] then
+                    planet_taken_ownership[k] = true
+                    if G.P_CENTERS[k].loc_vars then
+                        local lv = G.P_CENTERS[k].loc_vars
+                        G.P_CENTERS[k].loc_vars = function(self, info_queue, card)
+                            local ret = lv(self, info_queue, card)
+                            ret.vars[5] = G.GAME.hands[self.config.hand_type].l_glop
+                            return ret
+                        end
+                    end
+                end
+            end
+        end
+    end
 end
 
 -- Glop Content
