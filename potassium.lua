@@ -661,6 +661,36 @@ SMODS.Edition{
     end
 }
 
+GLOP_EVOLUTIONS = {}
+SMODS.Consumable{
+    key = "substance",
+    set = "Spectral",
+    can_use = function(self, card)
+        for i = 1, #G.jokers.cards do
+            if not G.jokers.cards[i].edition then
+                return true
+            end
+        end        
+    end,
+    use = function(self, card, area)
+        local eligible_jokers = {}
+        for i = 1, #G.jokers.cards do
+            if not G.jokers.cards[i].edition then
+                eligible_jokers[#eligible_jokers+1] = G.jokers.cards[i]
+            end
+        end
+        local joker = pseudorandom_element(eligible_jokers, pseudoseed("substance"..G.GAME.round_resets.ante))
+        if joker then
+            --TODO: evolution check
+            joker:set_edition("e_banana_glop")
+            joker:juice_up(0.3, 0.4)
+        end
+    end,
+    loc_vars = function(self, info_queue, card)
+        info_queue[#info_queue+1] = G.P_CENTERS.e_banana_glop
+    end,
+}
+
 -- ==Misc UI Changes==
 local nf = number_format
 function number_format(...)
@@ -705,6 +735,15 @@ function banana_credits()
               {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
                 {n=G.UIT.T, config={text = 'pannella', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
               }},
+              {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
+                {n=G.UIT.T, config={text = 'Lexi', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
+              }},
+              {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
+                {n=G.UIT.T, config={text = 'Project666', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
+              }},
+              {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
+                {n=G.UIT.T, config={text = 'astrapboy', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
+              }},
             }},
             {n=G.UIT.C, config={align = "tl", padding = 0.05, minw = 2.5}, nodes={
                 {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
@@ -727,6 +766,15 @@ function banana_credits()
                 }},
               {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
                 {n=G.UIT.T, config={text = 'unexian', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
+              }},
+              {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
+                {n=G.UIT.T, config={text = 'Aure', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
+              }},
+              {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
+                {n=G.UIT.T, config={text = 'xphrogx', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
+              }},
+              {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
+                {n=G.UIT.T, config={text = 'GloomyStew', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
               }},
             }},
           }},

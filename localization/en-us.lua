@@ -51,6 +51,32 @@ return {
 					"{C:inactive}(Currently {C:chips}+#2#{C:inactive} Chips)",
 				}
 			},
+            j_four_fingers={
+                name="Four Bananas",
+                text={
+                    "All {C:attention}Flushes{} and",
+                    "{C:attention}Straights{} can be",
+                    "made with {C:attention}4{} cards",
+                },
+            },
+            j_8_ball={
+                name="Banana Ball",
+                text={
+                    "{C:green}#1# in #2#{} chance for each",
+                    "played {C:attention}8{} to create a",
+                    "{C:tarot}Tarot{} card when scored",
+                    "{C:inactive}(Must have room)",
+                },
+            },
+            j_dna={
+                name="BanaNA",
+                text={
+                    "If {C:attention}first hand{} of round",
+                    "has only {C:attention}1{} card, add a",
+                    "permanent copy to deck",
+                    "and draw it to {C:attention}hand",
+                },
+            },
 			j_banana_glopbucket = {
 				name = "A Glop in the Bucket",
 				text = {
@@ -86,6 +112,16 @@ return {
 				text={
 					"{C:red}Removes{} Discards",
 				},
+			}
+		},
+		Spectral = {
+			c_banana_substance = {
+				name = "Substance",
+				text = {
+					"Applies {C:glop}Glop{} to",
+					"a random Joker",
+					"Some Jokers {C:attention,E:1}evolve"
+				}
 			}
 		}
 	},
