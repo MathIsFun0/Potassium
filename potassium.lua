@@ -122,7 +122,7 @@ SMODS.Enhancement:take_ownership('m_stone', {
                 mult = card.ability.extra.mult
             }
         end
-        if context.cardarea == G.play and context.destroying_card then
+        if context.cardarea == G.play and context.destroying_card and context.destroy_card == card then
             if pseudorandom('stone_gros_michel') < G.GAME.probabilities.normal/card.ability.extra.chance then 
                 G.E_MANAGER:add_event(Event({
                     func = function()
@@ -262,7 +262,7 @@ end
 local bfs = G.FUNCS.buy_from_shop
 function G.FUNCS.buy_from_shop(e)
     local card = e.config.ref_table
-    if card and card:is(Card) and not (((G.GAME.dollars-G.GAME.bankrupt_at) - G.GAME.current_round.reroll_cost < 0) and G.GAME.current_round.reroll_cost ~= 0) and trolled() then
+    if card and card:is(Card) and not ((to_big(G.GAME.dollars-G.GAME.bankrupt_at) - G.GAME.current_round.reroll_cost < to_big(0)) and G.GAME.current_round.reroll_cost ~= 0) and trolled() then
         return G.FUNCS.reroll_shop()
     end
     return bfs(e)
@@ -435,8 +435,8 @@ SMODS.Blind{
 		end
     end,
     boss_colour = G.C.BANAN1,
-    boss = {min = 10, max = 10},
-    in_pool = false,
+    boss = {min = 9999, max = 10, showdown = true},
+    in_pool = function() return false end,
     dollars = 15,
 }
 
@@ -450,8 +450,8 @@ SMODS.Blind{
         }
     end,
     boss_colour = G.C.BANAN2,
-    boss = {min = 10, max = 10},
-    in_pool = false,
+    boss = {min = 9999, max = 10, showdown = true},
+    in_pool = function() return false end,
     dollars = 15,
     calculate = function(self, card, context)
         if
@@ -601,7 +601,7 @@ function SMODS.calculate_individual_effect(effect, scored_card, key, amount, fro
         glop = glop + amount
         update_hand_text({delay = 0}, {chips = hand_chips, mult = mult, glop = glop})
         if not effect.remove_default_message then
-            card_eval_status_text(scored_card, 'jokers', nil, percent, nil, {message = "+"..amount.." Glop", colour =  G.C.GLOP})
+            card_eval_status_text(scored_card, 'jokers', nil, percent, nil, {message = "+"..number_format(amount).." Glop", colour =  G.C.GLOP})
         end
         return true
     end
@@ -611,7 +611,7 @@ function SMODS.calculate_individual_effect(effect, scored_card, key, amount, fro
         glop = glop * amount
         update_hand_text({delay = 0}, {chips = hand_chips, mult = mult, glop = glop})
         if not effect.remove_default_message then
-            card_eval_status_text(scored_card, 'jokers', nil, percent, nil, {message = "X"..amount.." Glop", colour =  G.C.GLOP})
+            card_eval_status_text(scored_card, 'jokers', nil, percent, nil, {message = "X"..number_format(amount).." Glop", colour =  G.C.GLOP})
         end
         return true
     end
@@ -621,7 +621,7 @@ function SMODS.calculate_individual_effect(effect, scored_card, key, amount, fro
         glop = glop ^ amount
         update_hand_text({delay = 0}, {chips = hand_chips, mult = mult, glop = glop})
         if not effect.remove_default_message then
-            card_eval_status_text(scored_card, 'jokers', nil, percent, nil, {message = "^"..amount.." Glop", colour =  G.C.GLOP})
+            card_eval_status_text(scored_card, 'jokers', nil, percent, nil, {message = "^"..number_format(amount).." Glop", colour =  G.C.GLOP})
         end
         return true
     end
@@ -735,6 +735,57 @@ SMODS.Joker{
 	end,
 }
 
+SMODS.Joker{
+	key = "glopcorn",
+	pos = { x = 0, y = 0 },
+	config = { extra = { extra = 0.1, glop = 0.7 } },
+	rarity = 1,
+	cost = 4,
+	perishable_compat = false,
+	blueprint_compat = true,
+    in_pool = false,
+	loc_vars = function(self, info_queue, center)
+		return { vars = { center.ability.extra.extra, center.ability.extra.glop } }
+	end,
+	calculate = function(self, card, context)
+		if context.joker_main and card.ability.extra.glop > 0 then
+			return {
+				glop = card.ability.extra.glop,
+			}
+		end
+		if context.end_of_round and context.cardarea == G.jokers and not context.blueprint then
+			if card.ability.extra.glop - card.ability.extra.extra <= 10^-6 then 
+                G.E_MANAGER:add_event(Event({
+                    func = function()
+                        play_sound('tarot1')
+                        card.T.r = -0.2
+                        card:juice_up(0.3, 0.4)
+                        card.states.drag.is = true
+                        card.children.center.pinch.x = true
+                        G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.3, blockable = false,
+                            func = function()
+                                    G.jokers:remove_card(card)
+                                    card:remove()
+                                    card = nil
+                                return true; end})) 
+                        return true
+                    end
+                })) 
+                return {
+                    message = localize('k_eaten_ex'),
+                    colour = G.C.RED
+                }
+            else
+                card.ability.extra.glop = card.ability.extra.glop - card.ability.extra.extra
+                return {
+                    message = "-"..number_format(card.ability.extra.extra).." Glop",
+                    colour = G.C.GLOP
+                }
+            end
+		end
+	end,
+}
+
 SMODS.Shader{
     key = "glop",
     path = "glop.fs"
@@ -780,7 +831,9 @@ SMODS.Edition{
     end
 }
 
-GLOP_EVOLUTIONS = {}
+GLOP_EVOLUTIONS = {
+    j_popcorn = "j_banana_glopcorn"
+}
 SMODS.Consumable{
     key = "substance",
     set = "Spectral",
@@ -800,8 +853,11 @@ SMODS.Consumable{
         end
         local joker = pseudorandom_element(eligible_jokers, pseudoseed("substance"..G.GAME.round_resets.ante))
         if joker then
-            --TODO: evolution check
-            joker:set_edition("e_banana_glop")
+            if GLOP_EVOLUTIONS[joker.config.center.key] then
+                joker:set_ability(G.P_CENTERS[GLOP_EVOLUTIONS[joker.config.center.key]])
+            else
+                joker:set_edition("e_banana_glop")
+            end
             joker:juice_up(0.3, 0.4)
         end
     end,

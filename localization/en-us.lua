@@ -85,6 +85,15 @@ return {
 					"played {C:attention}card{} is scored",
 					"{C:inactive}(Currently {C:glop}+#2#{C:inactive} Glop)",
 				}
+			},
+			j_banana_glopcorn = {
+				name = "Glop Corn",
+				text = {
+					"{C:glop}+#2#{} Glop",
+					"Decreases by {C:glop}#1#{} at",
+					"end of round",
+					"{C:inactive,s:0.8}Fresh off the clob",
+				}
 			}
 		},
 		Edition = {
