@@ -420,6 +420,18 @@ position = "after"
 payload = '''check_and_set_high_score('best_glop', glop)'''
 match_indent = true
 
+# Tag calculations pre-scoring
+[[patches]]
+[patches.pattern]
+target = "functions/state_events.lua"
+pattern = '''mult, hand_chips = mod_mult(mult), mod_chips(hand_chips)'''
+position = "after"
+payload = '''check_and_set_high_score('best_glop', glop)
+for i = 1, #G.GAME.tags do
+    G.GAME.tags[i]:apply_to_run({type = 'scoring'})
+end'''
+match_indent = true
+
 # Add credits tab
 [[patches]]
 [patches.pattern]

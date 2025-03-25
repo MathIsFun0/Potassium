@@ -785,6 +785,154 @@ SMODS.Joker{
 		end
 	end,
 }
+SMODS.Joker{
+	key = "glopmichel",
+	pos = { x = 0, y = 0 },
+	config = { extra = { extra = 6, glop = 0.1 } },
+	rarity = 1,
+	cost = 4,
+	perishable_compat = false,
+	blueprint_compat = true,
+    in_pool = false,
+	loc_vars = function(self, info_queue, center)
+		return { vars = { center.ability.extra.extra, G.GAME.probabilities.normal, center.ability.extra.glop, center.ability.extra.glop * center.ability.extra.extra } }
+	end,
+	calculate = function(self, card, context)
+		if context.joker_main and card.ability.extra.glop > 0 then
+            if pseudorandom(pseudoseed("glop_michel")) < G.GAME.probabilities.normal/card.ability.extra.extra then
+                return {
+                    glop = card.ability.extra.glop * card.ability.extra.extra,
+                }
+            else
+                return {
+                    glop = card.ability.extra.glop,
+                }
+            end
+		end
+	end,
+}
+
+SMODS.Joker{
+	key = "glopcola",
+	pos = { x = 0, y = 0 },
+	rarity = 2,
+	cost = 6,
+	perishable_compat = false,
+	blueprint_compat = true,
+    in_pool = false,
+	loc_vars = function(self, info_queue, center)
+		info_queue[#info_queue+1] = G.P_TAGS.tag_banana_glop
+        return {vars = {localize({type = "name_text", set = "Tag", key = "tag_banana_glop"})}}
+	end,
+	calculate = function(self, card, context)
+		if context.selling_self then
+            G.E_MANAGER:add_event(Event({
+                func = (function()
+                    add_tag(Tag('tag_banana_glop'))
+                    play_sound('generic1', 0.9 + math.random()*0.1, 0.8)
+                    play_sound('holo1', 1.2 + math.random()*0.1, 0.4)
+                    return true
+                end)
+            }))
+		end
+	end,
+}
+
+SMODS.Tag{
+    key = "glop",
+    in_pool = false,
+    apply = function(self, tag, context)
+        if context.type == "tag_add" and context.tag.key ~= "tag_banana_glop" then
+            local lock = tag.ID
+            G.CONTROLLER.locks[lock] = true
+            tag:yep('+', G.C.BLUE,function()
+                if context.tag.ability and context.tag.ability.orbital_hand then
+                    G.orbital_hand = context.tag.ability.orbital_hand
+                end
+                add_tag(Tag(context.tag.key))
+                G.orbital_hand = nil
+                G.CONTROLLER.locks[lock] = nil
+                return true
+            end)
+            tag.triggered = true
+        end
+        if context.type == "scoring" then
+            glop = glop + 0.5
+            update_hand_text({delay = 0}, {glop = glop})
+            tag.HUD_tag.jimbo = true
+            card_eval_status_text(tag.HUD_tag, 'jokers', nil, percent, nil, {message = "+0.5 Glop", colour =  G.C.GLOP})
+            tag.HUD_tag.jimbo = nil
+        end
+    end
+}
+SMODS.Joker{
+	key = "glopendish",
+	pos = { x = 0, y = 0 },
+	rarity = 1,
+	cost = 4,
+    config = {extra = {glop = 1.5, odds1 = 1000, odds2 = 2}},
+	perishable_compat = false,
+	blueprint_compat = true,
+    in_pool = false,
+	loc_vars = function(self, info_queue, center)
+        return {vars = {center.ability.extra.glop, G.GAME.probabilities.normal, center.ability.extra.odds1, center.ability.extra.odds2}}
+	end,
+	calculate = function(self, card, context)
+		if context.joker_main and card.ability.extra.glop > 0 then
+			return {
+				glop = card.ability.extra.glop,
+			}
+		end
+        if context.end_of_round and context.cardarea == G.jokers and not context.blueprint then
+			if pseudorandom(pseudoseed('glopendish_extinct')) < G.GAME.probabilities.normal/card.ability.extra.odds1 then 
+                G.E_MANAGER:add_event(Event({
+                    func = function()
+                        play_sound('tarot1')
+                        card.T.r = -0.2
+                        card:juice_up(0.3, 0.4)
+                        card.states.drag.is = true
+                        card.children.center.pinch.x = true
+                        G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.3, blockable = false,
+                            func = function()
+                                    G.jokers:remove_card(card)
+                                    card:remove()
+                                    card = nil
+                                return true; end})) 
+                        return true
+                    end
+                })) 
+                return {
+                    message = localize('k_extinct_ex'),
+                    colour = G.C.GLOP
+                }
+            else
+                return {
+                    message = localize('k_safe_ex'),
+                    colour = G.C.GLOP
+                }
+            end
+		end
+        if context.setting_blind and not card.getting_sliced and not context.blueprint and pseudorandom(pseudoseed("glopendish_destroy")) < G.GAME.probabilities.normal/card.ability.extra.odds2 then
+            local my_pos = nil
+            for i = 1, #G.jokers.cards do
+                if G.jokers.cards[i] == card then my_pos = i; break end
+            end
+            if my_pos and G.jokers.cards[my_pos+1] and not G.jokers.cards[my_pos+1].ability.eternal and not G.jokers.cards[my_pos+1].getting_sliced then 
+                local sliced_card = G.jokers.cards[my_pos+1]
+                sliced_card.getting_sliced = true
+                G.GAME.joker_buffer = G.GAME.joker_buffer - 1
+                G.E_MANAGER:add_event(Event({func = function()
+                    G.GAME.joker_buffer = 0
+                    card.ability.extra.glop = card.ability.extra.glop + sliced_card.sell_cost*0.1
+                    card:juice_up(0.8, 0.8)
+                    sliced_card:start_dissolve({HEX("57ecab")}, nil, 1.6)
+                    play_sound('slice1', 0.96+math.random()*0.08)
+                return true end }))
+                card_eval_status_text(card, 'extra', nil, nil, nil, {message = number_format(card.ability.extra.glop+0.1*sliced_card.sell_cost).." Glop", colour = G.C.GLOP, no_juice = true})
+            end
+        end
+	end,
+}
 
 SMODS.Shader{
     key = "glop",
@@ -832,7 +980,10 @@ SMODS.Edition{
 }
 
 GLOP_EVOLUTIONS = {
-    j_popcorn = "j_banana_glopcorn"
+    j_popcorn = "j_banana_glopcorn",
+    j_gros_michel = "j_banana_glopmichel",
+    j_diet_cola = "j_banana_glopcola",
+    j_cavendish = "j_banana_glopendish",
 }
 SMODS.Consumable{
     key = "substance",
@@ -918,6 +1069,9 @@ function banana_credits()
               }},
               {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
                 {n=G.UIT.T, config={text = 'astrapboy', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
+              }},
+              {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
+                {n=G.UIT.T, config={text = 'notmario', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
               }},
             }},
             {n=G.UIT.C, config={align = "tl", padding = 0.05, minw = 2.5}, nodes={

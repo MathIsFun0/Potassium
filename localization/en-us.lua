@@ -94,6 +94,34 @@ return {
 					"end of round",
 					"{C:inactive,s:0.8}Fresh off the clob",
 				}
+			},
+			j_banana_glopmichel = {
+				name = "Glop Michel",
+				text = {
+					"{C:glop}+#3#{} Glop",
+					"{C:green}#2# in #1#{} chance for",
+					"{C:glop}+#4#{} Glop instead"
+				}
+			},
+			j_banana_glopcola = {
+				name = "Glop Cola",
+                text={
+                    "Sell this card to",
+                    "create a free",
+                    "{C:glop}#1#",
+                },
+			},
+			j_banana_glopendish = {
+				name = "Glopendish",
+				text = {
+                    "When {C:attention}Blind{} is selected, {C:green}#2# in #4#{} chance ",
+                    "to destroy Joker to the right",
+                    "and permanently add {C:attention}one-tenth{} of",
+                    "its sell value to this {C:glop}Glop",
+					"{C:green}#2# in #3#{} chance this card",
+                    "is destroyed at end of round",
+                    "{C:inactive}(Currently {C:glop}+#1#{C:inactive} Glop)",
+				}
 			}
 		},
 		Edition = {
@@ -130,6 +158,17 @@ return {
 					"Applies {C:glop}Glop{} to",
 					"a random Joker",
 					"Some Jokers {C:attention,E:1}evolve"
+				}
+			}
+		},
+		Tag = {
+			tag_banana_glop = {
+				name = "Glop Tag",
+				text = {
+					"{C:glop}+0.5{} Glop",
+                    "Gives a copy of the",
+                    "next selected {C:attention}Tag{}",
+                    "{s:0.8,C:glop}Glop Tag{s:0.8} excluded",
 				}
 			}
 		}
