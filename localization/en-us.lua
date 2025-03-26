@@ -122,6 +122,27 @@ return {
                     "is destroyed at end of round",
                     "{C:inactive}(Currently {C:glop}+#1#{C:inactive} Glop)",
 				}
+			},
+			j_banana_glopmother = {
+				name = "Glopmother",
+				text = {
+					"{X:glop,C:white,E:1,s:1.5}^2{s:1.5,E:1,C:dark_edition} Glop"
+				}
+			},
+			j_banana_glopmother_fake_out = {
+				name = "Glopmother",
+				text = {
+					"Playing cards give",
+					"{X:sfark,C:white}X7{} Sfark when scored"
+				}
+			},
+			j_banana_glopku = {
+				name = "Glopku",
+				text = {
+                    "Every played {C:attention}card{}",
+                    "permanently gains",
+                    "{C:glop}+#1#{} Glop when scored",
+				}
 			}
 		},
 		Edition = {
@@ -159,7 +180,24 @@ return {
 					"a random Joker",
 					"Some Jokers {C:attention,E:1}evolve"
 				}
-			}
+			},
+			c_banana_glopularity = {
+				name = "Glopularity",
+				text = {
+					"{C:attention}Halve{} all hand levels,",
+					"all poker hand gain {C:glop}+0.2{} Glop",
+					"for each removed level",
+				}
+			},
+			c_banana_glopway = {
+				name = "Glopway",
+				text = {
+					"{C:glop}+0.01{} base Glop",
+					"across all runs",
+					"Create a {C:attention}Glopku",
+					"{C:inactive}(Must have room)"
+				}
+			},
 		},
 		Tag = {
 			tag_banana_glop = {
@@ -169,6 +207,22 @@ return {
                     "Gives a copy of the",
                     "next selected {C:attention}Tag{}",
                     "{s:0.8,C:glop}Glop Tag{s:0.8} excluded",
+				}
+			}
+		},
+		Planet = {
+			c_banana_glopur = {
+				name = "Glopur",
+				text = {
+					"All poker hands",
+					"gain {C:glop}+0.1{} Glop"
+				}
+			},
+		},
+		Other = {
+			card_extra_glop = {
+				text = {
+					"{C:glop}+#1#{} Glop",
 				}
 			}
 		}

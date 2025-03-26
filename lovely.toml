@@ -116,6 +116,19 @@ position = "before"
 payload = '''G.hand_text_area.glop = self.HUD:get_UIE_by_ID('hand_glop')'''
 match_indent = true
 
+# huh
+[[patches]]
+[patches.pattern]
+target = "functions/common_events.lua"
+pattern = '''end
+if vals.mult and G.GAME.current_round.current_hand.mult ~= vals.mult then'''
+position = "before"
+payload = '''
+if not G.TAROT_INTERRUPT then G.hand_text_area.chips:juice_up() end
+'''
+match_indent = true
+
+
 # update_hand_text on glop
 [[patches]]
 [patches.pattern]
@@ -431,6 +444,59 @@ for i = 1, #G.GAME.tags do
     G.GAME.tags[i]:apply_to_run({type = 'scoring'})
 end'''
 match_indent = true
+
+# Copying steamodded to add perma_glop
+
+# set_ability: set defaults for permanent bonuses
+[[patches]]
+[patches.pattern]
+target = "card.lua"
+pattern = "perma_bonus = self.ability and self.ability.perma_bonus or 0,"
+position = "after"
+payload = '''
+perma_glop = self.ability and self.ability.perma_glop or 0,
+'''
+match_indent = true
+overwrite = false
+
+# generate_UIBox_ability_table(): prime specific_vars for playing cards
+[[patches]]
+[patches.pattern]
+target = "card.lua"
+pattern = "bonus_chips = (self.ability.bonus + (self.ability.perma_bonus or 0)) > 0 and (self.ability.bonus + (self.ability.perma_bonus or 0)) or nil,"
+position = "at"
+payload = '''
+bonus_glop = self.ability.perma_glop ~= 0 and (self.ability.perma_glop) or nil,'''
+match_indent = true
+overwrite = false
+
+[[patches]]
+[patches.pattern]
+target = "card.lua"
+pattern = 'function Card:get_edition()'
+position = "before"
+match_indent = true
+payload = '''
+function Card:get_glop()
+    if self.debuff then return 0 end
+    local ret = (self.ability.glop or 0) + (self.ability.perma_glop or 0)
+    -- TARGET: get_glop
+    return ret
+end
+'''
+
+[[patches]]
+[patches.pattern]
+target = "functions/common_events.lua"
+pattern = '-- TARGET: main scoring on played cards'
+position = "after"
+match_indent = true
+payload = '''
+local glop = card:get_glop()
+if glop > 0 then
+    ret.playing_card.glop = glop
+end
+'''
 
 # Add credits tab
 [[patches]]

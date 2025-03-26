@@ -39,6 +39,12 @@ SMODS.Atlas{
     raw_key = true
 }
 SMODS.Atlas{
+    key = "banana",
+    path = "Bananokers.png",
+    px = 71,
+    py = 95,
+}
+SMODS.Atlas{
     key = "balatro",
     path = "title.png",
     px = 333,
@@ -296,9 +302,12 @@ function Game:init_game_object()
     local ret = gigo(self)
     ret.win_ante = ret.win_ante + 2
     ret.round_scores.best_glop = {label = "Best Glop", amt = 0}
+    if not G.PROFILES[G.SETTINGS.profile].glop then
+        G.PROFILES[G.SETTINGS.profile].glop = 1
+    end
     for k, v in pairs(ret.hands) do
-        v.glop = to_big(1)
-        v.s_glop = to_big(1)
+        v.glop = to_big(G.PROFILES[G.SETTINGS.profile].glop)
+        v.s_glop = to_big(G.PROFILES[G.SETTINGS.profile].glop)
         v.l_glop = v.l_mult * 0.01
     end
     return ret
@@ -633,6 +642,7 @@ function loc_colour(_c, _default)
 		lc()
 	end
 	G.ARGS.LOC_COLOURS.glop = G.C.GLOP
+    G.ARGS.LOC_COLOURS.sfark = HEX("ff00ff")
 	return lc(_c, _default)
 end
 
@@ -706,6 +716,18 @@ function init_localization()
     end
 end
 
+local oldfunc = generate_card_ui
+function generate_card_ui(_c, full_UI_table, specific_vars, card_type, badges, hide_desc, main_start, main_end,card)
+    full_UI_table = oldfunc(_c, full_UI_table, specific_vars, card_type, badges, hide_desc, main_start, main_end,card)
+    if card and card.ability and card.ability.perma_glop then
+        local desc_nodes = full_UI_table.main
+        if card.ability.perma_glop ~= 0 then
+            localize{type = 'other', key = 'card_extra_glop', nodes = desc_nodes, vars = {card.ability.perma_glop}}
+        end
+    end
+    return full_UI_table
+end
+
 -- Glop Content
 SMODS.Joker{
 	key = "glopbucket",
@@ -743,7 +765,7 @@ SMODS.Joker{
 	cost = 4,
 	perishable_compat = false,
 	blueprint_compat = true,
-    in_pool = false,
+    in_pool = function() return false end,
 	loc_vars = function(self, info_queue, center)
 		return { vars = { center.ability.extra.extra, center.ability.extra.glop } }
 	end,
@@ -793,7 +815,7 @@ SMODS.Joker{
 	cost = 4,
 	perishable_compat = false,
 	blueprint_compat = true,
-    in_pool = false,
+    in_pool = function() return false end,
 	loc_vars = function(self, info_queue, center)
 		return { vars = { center.ability.extra.extra, G.GAME.probabilities.normal, center.ability.extra.glop, center.ability.extra.glop * center.ability.extra.extra } }
 	end,
@@ -819,7 +841,7 @@ SMODS.Joker{
 	cost = 6,
 	perishable_compat = false,
 	blueprint_compat = true,
-    in_pool = false,
+    in_pool = function() return false end,
 	loc_vars = function(self, info_queue, center)
 		info_queue[#info_queue+1] = G.P_TAGS.tag_banana_glop
         return {vars = {localize({type = "name_text", set = "Tag", key = "tag_banana_glop"})}}
@@ -840,7 +862,7 @@ SMODS.Joker{
 
 SMODS.Tag{
     key = "glop",
-    in_pool = false,
+    in_pool = function() return false end,
     apply = function(self, tag, context)
         if context.type == "tag_add" and context.tag.key ~= "tag_banana_glop" then
             local lock = tag.ID
@@ -873,7 +895,7 @@ SMODS.Joker{
     config = {extra = {glop = 1.5, odds1 = 1000, odds2 = 2}},
 	perishable_compat = false,
 	blueprint_compat = true,
-    in_pool = false,
+    in_pool = function() return false end,
 	loc_vars = function(self, info_queue, center)
         return {vars = {center.ability.extra.glop, G.GAME.probabilities.normal, center.ability.extra.odds1, center.ability.extra.odds2}}
 	end,
@@ -933,6 +955,54 @@ SMODS.Joker{
         end
 	end,
 }
+SMODS.Joker{
+	key = "glopmother",
+	pos = { x = 0, y = 0 },
+	rarity = 4,
+	cost = 20,
+	perishable_compat = false,
+	blueprint_compat = true,
+    in_pool = function() return false end,
+    config = {extra = {fake_out = true}},
+    loc_vars = function(self, info_queue, center)
+        if center.ability.extra.fake_out then
+            return {key = "j_banana_glopmother_fake_out"}
+        end
+    end,
+	calculate = function(self, card, context)
+		if context.joker_main then
+            card.ability.extra.fake_out = false
+            return {
+                eglop = 2,
+            }
+		end
+	end,
+}
+SMODS.Joker{
+	key = "glopku",
+	pos = { x = 0, y = 0 },
+    soul_pos = {x = 1, y = 0 },
+	rarity = 4,
+	cost = 20,
+	perishable_compat = false,
+	blueprint_compat = true,
+    in_pool = function() return false end,
+    config = {extra = {glop = 0.1}},
+    atlas = "banana",
+    loc_vars = function(self, info_queue, center)
+        return {vars = {center.ability.extra.glop}}
+    end,
+	calculate = function(self, card, context)
+        if context.individual and context.cardarea == G.play then
+            context.other_card.ability.perma_glop = context.other_card.ability.perma_glop or 0
+            context.other_card.ability.perma_glop = context.other_card.ability.perma_glop + card.ability.extra.glop
+            return {
+                message = localize("k_upgrade_ex"),
+                colour = G.C.GLOP,
+            }
+        end
+	end,
+}
 
 SMODS.Shader{
     key = "glop",
@@ -961,12 +1031,12 @@ SMODS.Edition{
                 end
                 for _, k in ipairs(c_keys_e) do
                     if context.other_ret[m][k] then
-                        _xglop = _xglop + context.other_ret[m][k]
+                        _xglop = _xglop * context.other_ret[m][k]
                     end
                 end
                 for _, k in ipairs(c_keys_ee) do
                     if context.other_ret[m][k] then
-                        _eglop = _eglop + context.other_ret[m][k]
+                        _eglop = _eglop * context.other_ret[m][k]
                     end
                 end
             end
@@ -1006,6 +1076,8 @@ SMODS.Consumable{
         if joker then
             if GLOP_EVOLUTIONS[joker.config.center.key] then
                 joker:set_ability(G.P_CENTERS[GLOP_EVOLUTIONS[joker.config.center.key]])
+            elseif joker.config.center.rarity == 4 then
+                joker:set_ability(G.P_CENTERS["j_banana_glopmother"])
             else
                 joker:set_edition("e_banana_glop")
             end
@@ -1014,6 +1086,96 @@ SMODS.Consumable{
     end,
     loc_vars = function(self, info_queue, card)
         info_queue[#info_queue+1] = G.P_CENTERS.e_banana_glop
+    end,
+}
+
+SMODS.Consumable{
+    key = "glopur",
+    set = "Planet",
+    can_use = function(self, card)
+        return true      
+    end,
+    use = function(self, card, area)
+        update_hand_text({sound = 'button', volume = 0.7, pitch = 0.8, delay = 0.3}, {handname=localize('k_all_hands'),chips = '...', mult = '...', glop = '...', level=''})
+        G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.2, func = function()
+            play_sound('tarot1')
+            card:juice_up(0.8, 0.5)
+            G.TAROT_INTERRUPT_PULSE = true
+            return true end }))
+        update_hand_text({delay = 0}, {glop = '+0.1', StatusText = true})
+        delay(1.3)
+        for k, v in pairs(G.GAME.hands) do
+            v.glop = v.glop + 0.1
+        end
+        update_hand_text({sound = 'button', volume = 0.7, pitch = 1.1, delay = 0}, {mult = 0, chips = 0, glop = 0, handname = '', level = ''})
+    end,
+}
+
+SMODS.Consumable{
+    key = "glopularity",
+    set = "Spectral",
+    soul_set = "Planet",
+    hidden = true,
+    can_use = function(self, card)
+        return true      
+    end,
+    use = function(self, card, area)
+        update_hand_text({sound = 'button', volume = 0.7, pitch = 0.8, delay = 0.3}, {handname=localize('k_all_hands'),chips = '...', mult = '...', glop = '...', level=''})
+        G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.2, func = function()
+            play_sound('tarot1')
+            card:juice_up(0.8, 0.5)
+            G.TAROT_INTERRUPT_PULSE = true
+            return true end }))
+        update_hand_text({delay = 0}, {chips = '-', StatusText = true})
+        G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.9, func = function()
+            play_sound('tarot1')
+            card:juice_up(0.8, 0.5)
+            G.TAROT_INTERRUPT_PULSE = true
+            return true end }))
+        update_hand_text({delay = 0}, {mult = '-', StatusText = true})
+        G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.9, func = function()
+            play_sound('tarot1')
+            card:juice_up(0.8, 0.5)
+            G.TAROT_INTERRUPT_PULSE = true
+            return true end }))
+        update_hand_text({delay = 0}, {glop = '+', StatusText = true})
+        delay(1.3)
+        local glop = 0
+        for k, v in pairs(G.GAME.hands) do
+            local level = v.level
+            glop = glop + 0.2 * (level-math.ceil(level/2))
+            v.level = math.ceil(level/2)
+        end
+        for k, v in pairs(G.GAME.hands) do
+            v.glop = v.glop + glop
+        end
+        update_hand_text({sound = 'button', volume = 0.7, pitch = 1.1, delay = 0}, {mult = 0, chips = 0, glop = 0, handname = '', level = ''})
+    end,
+}
+
+SMODS.Consumable{
+    key = "glopway",
+    set = "Spectral",
+    hidden = true,
+    can_use = function(self, card)
+        return #G.jokers.cards < G.jokers.config.card_limit or card.area == G.jokers      
+    end,
+    use = function(self, card, area)
+        
+        update_hand_text({sound = 'button', volume = 0.7, pitch = 0.8, delay = 0.3}, {handname='...',chips = '...', mult = '...', glop = '...', level=''})
+        G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.2, func = function()
+            play_sound('tarot1')
+            card:juice_up(0.8, 0.5)
+            G.TAROT_INTERRUPT_PULSE = true
+            return true end }))
+        update_hand_text({delay = 0}, {glop = '+0.01', StatusText = true})
+        delay(1.3)
+        for k, v in pairs(G.GAME.hands) do
+            v.glop = v.glop + 0.01
+        end
+        G.PROFILES[G.SETTINGS.profile].glop = G.PROFILES[G.SETTINGS.profile].glop + 0.01
+        update_hand_text({sound = 'button', volume = 0.7, pitch = 1.1, delay = 0}, {mult = 0, chips = 0, glop = 0, handname = '', level = ''})
+        SMODS.add_card({key="j_banana_glopku"})
     end,
 }
 
@@ -1104,6 +1266,9 @@ function banana_credits()
               }},
               {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
                 {n=G.UIT.T, config={text = 'GloomyStew', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
+              }},
+              {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
+                {n=G.UIT.T, config={text = 'George the Rat', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
               }},
             }},
           }},
