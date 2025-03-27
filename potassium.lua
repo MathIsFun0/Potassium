@@ -45,6 +45,12 @@ SMODS.Atlas{
     py = 95,
 }
 SMODS.Atlas{
+    key = "hologram",
+    path = "Hologram.png",
+    px = 95,
+    py = 95,
+}
+SMODS.Atlas{
     key = "balatro",
     path = "title.png",
     px = 333,
@@ -208,6 +214,42 @@ SMODS.Stake:take_ownership('stake_blue', {
         },
     }
 })
+
+SMODS.Joker:take_ownership('j_hologram', {
+    display_size = { w = 95, h = 95 },
+    atlas = "hologram",
+    pos = { x = 0, y = 10 },
+    soul_pos = { x = 0, y = 0 },
+})
+-- animate hologram sprite
+-- code adapted from Cryptid's jimball
+banana_hologram_dt = 0
+local _game_update = Game.update
+function Game:update(dt)
+    _game_update(self, dt)
+    banana_hologram_dt = banana_hologram_dt + dt -- cryptid has a check here but im not sure what it's for
+	if G.P_CENTERS and G.P_CENTERS.j_hologram and banana_hologram_dt > 0.05 then
+		banana_hologram_dt = banana_hologram_dt - 0.05
+		local hologramobj = G.P_CENTERS.j_hologram
+		if hologramobj.soul_pos.x == 11 and hologramobj.soul_pos.y == 9 then
+			hologramobj.soul_pos.x = 0
+			hologramobj.soul_pos.y = 0
+		elseif hologramobj.soul_pos.x < 11 then
+			hologramobj.soul_pos.x = hologramobj.soul_pos.x + 1
+		elseif hologramobj.soul_pos.y < 9 then
+			hologramobj.soul_pos.x = 0
+			hologramobj.soul_pos.y = hologramobj.soul_pos.y + 1
+		end
+        -- oh my god i hate this so much but ARGH
+        -- note that this can't use find_card because it also needs to work in the collection
+        -- unless there's some other way you can do it
+        for _, card in pairs(G.I.CARD) do
+            if card and card.config.center == hologramobj then
+                card.children.floating_sprite:set_sprite_pos(hologramobj.soul_pos)
+            end
+        end
+	end
+end
 
 -- ===Banana Content===
 SMODS.Back{
