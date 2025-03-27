@@ -185,7 +185,7 @@ return {
 				name = "Glopularity",
 				text = {
 					"{C:attention}Halve{} all hand levels,",
-					"all poker hand gain {C:glop}+0.2{} Glop",
+					"all poker hands gain {C:glop}+0.2{} Glop",
 					"for each removed level",
 				}
 			},

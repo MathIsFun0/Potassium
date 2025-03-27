@@ -60,6 +60,16 @@ SMODS.Atlas{
 	frames = 21,
 }
 
+-- ==New Sounds==
+SMODS.Sound({
+    key = "glopedition",
+    path = "GlopEdition.wav"
+})
+SMODS.Sound({
+    key = "glop",
+    path = "Glop.wav"
+})
+
 -- ===Add updates to existing Jokers===
 SMODS.Joker:take_ownership('j_oops', {
     name = "Oops! All Bananas",
@@ -610,7 +620,7 @@ function SMODS.calculate_individual_effect(effect, scored_card, key, amount, fro
         glop = glop + amount
         update_hand_text({delay = 0}, {chips = hand_chips, mult = mult, glop = glop})
         if not effect.remove_default_message then
-            card_eval_status_text(scored_card, 'jokers', nil, percent, nil, {message = "+"..number_format(amount).." Glop", colour =  G.C.GLOP})
+            card_eval_status_text(scored_card, 'jokers', nil, percent, nil, {message = "+"..number_format(amount).." Glop", colour =  G.C.GLOP, sound = "banana_glop"})
         end
         return true
     end
@@ -620,7 +630,7 @@ function SMODS.calculate_individual_effect(effect, scored_card, key, amount, fro
         glop = glop * amount
         update_hand_text({delay = 0}, {chips = hand_chips, mult = mult, glop = glop})
         if not effect.remove_default_message then
-            card_eval_status_text(scored_card, 'jokers', nil, percent, nil, {message = "X"..number_format(amount).." Glop", colour =  G.C.GLOP})
+            card_eval_status_text(scored_card, 'jokers', nil, percent, nil, {message = "X"..number_format(amount).." Glop", colour =  G.C.GLOP, sound = "banana_glop"})
         end
         return true
     end
@@ -630,7 +640,7 @@ function SMODS.calculate_individual_effect(effect, scored_card, key, amount, fro
         glop = glop ^ amount
         update_hand_text({delay = 0}, {chips = hand_chips, mult = mult, glop = glop})
         if not effect.remove_default_message then
-            card_eval_status_text(scored_card, 'jokers', nil, percent, nil, {message = "^"..number_format(amount).." Glop", colour =  G.C.GLOP})
+            card_eval_status_text(scored_card, 'jokers', nil, percent, nil, {message = "^"..number_format(amount).." Glop", colour =  G.C.GLOP, sound = "banana_glopedition"})
         end
         return true
     end
@@ -759,7 +769,8 @@ SMODS.Joker{
 
 SMODS.Joker{
 	key = "glopcorn",
-	pos = { x = 0, y = 0 },
+    atlas = "banana",
+	pos = { x = 1, y = 3 },
 	config = { extra = { extra = 0.1, glop = 0.7 } },
 	rarity = 1,
 	cost = 4,
@@ -809,7 +820,8 @@ SMODS.Joker{
 }
 SMODS.Joker{
 	key = "glopmichel",
-	pos = { x = 0, y = 0 },
+	pos = { x = 0, y = 2 },
+    atlas = "banana",
 	config = { extra = { extra = 6, glop = 0.1 } },
 	rarity = 1,
 	cost = 4,
@@ -836,7 +848,8 @@ SMODS.Joker{
 
 SMODS.Joker{
 	key = "glopcola",
-	pos = { x = 0, y = 0 },
+	pos = { x = 1, y = 4 },
+    atlas = "banana",
 	rarity = 2,
 	cost = 6,
 	perishable_compat = false,
@@ -889,7 +902,8 @@ SMODS.Tag{
 }
 SMODS.Joker{
 	key = "glopendish",
-	pos = { x = 0, y = 0 },
+	pos = { x = 1, y = 2 },
+    atlas = "banana",
 	rarity = 1,
 	cost = 4,
     config = {extra = {glop = 1.5, odds1 = 1000, odds2 = 2}},
@@ -957,7 +971,9 @@ SMODS.Joker{
 }
 SMODS.Joker{
 	key = "glopmother",
-	pos = { x = 0, y = 0 },
+	pos = { x = 0, y = 1 },
+    soul_pos = {x = 1, y = 1},
+    atlas = "banana",
 	rarity = 4,
 	cost = 20,
 	perishable_compat = false,
@@ -1013,6 +1029,7 @@ SMODS.Edition{
     key = "glop",
     shader = "glop",
     pos = {x = 7, y = 6},
+    sound = { sound = "banana_glopedition", per = 1, vol = 1},
     calculate = function(self, card, context)
         if context.post_trigger and context.other_card == card and context.other_ret then
             local _glop = 0
@@ -1057,6 +1074,8 @@ GLOP_EVOLUTIONS = {
 }
 SMODS.Consumable{
     key = "substance",
+    atlas = "banana",
+    pos = {x = 0, y = 4},
     set = "Spectral",
     can_use = function(self, card)
         for i = 1, #G.jokers.cards do
@@ -1076,8 +1095,10 @@ SMODS.Consumable{
         if joker then
             if GLOP_EVOLUTIONS[joker.config.center.key] then
                 joker:set_ability(G.P_CENTERS[GLOP_EVOLUTIONS[joker.config.center.key]])
-            elseif joker.config.center.rarity == 4 then
+                play_sound("banana_glopedition", 1, 1)
+            elseif joker.config.center.rarity == 4 and joker.config.center.key ~= "j_banana_glopmother" and joker.config.center.key ~= "j_banana_glopku" then
                 joker:set_ability(G.P_CENTERS["j_banana_glopmother"])
+                play_sound("banana_glopedition", 1, 1)
             else
                 joker:set_edition("e_banana_glop")
             end
@@ -1091,6 +1112,8 @@ SMODS.Consumable{
 
 SMODS.Consumable{
     key = "glopur",
+    atlas = "banana",
+    pos = {x = 0, y = 3},
     set = "Planet",
     can_use = function(self, card)
         return true      
@@ -1113,6 +1136,8 @@ SMODS.Consumable{
 
 SMODS.Consumable{
     key = "glopularity",
+    atlas = "banana",
+    pos = {x = 0, y = 5},
     set = "Spectral",
     soul_set = "Planet",
     hidden = true,
