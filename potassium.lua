@@ -1511,6 +1511,47 @@ SMODS.Consumable{
     end,
 }
 
+-- this came to me in a dream
+SMODS.PokerHand {
+    key = "bouquet",
+    chips=39.9,mult=4,
+    l_chips=30,l_mult=3,
+    example = {
+        { 'S_Q', true, },
+        { 'H_J', true, },
+        { 'C_T', true, },
+        { 'D_2', true, },
+        { 'S_7', false, },
+    },
+    evaluate = function(parts, hand)
+        local queens = {}
+        local jacks = {}
+        local tens = {}
+        local twos = {}
+
+        for _, card in pairs(hand) do
+            if card:get_id() == 10 then
+                tens[#tens + 1] = card
+            end
+            if card:get_id() == 11 then
+                jacks[#jacks + 1] = card
+            end
+            if card:get_id() == 12 then
+                queens[#queens + 1] = card
+            end
+            if card:get_id() == 2 then
+                twos[#twos + 1] = card
+            end
+        end
+
+        if #queens >= 1 and #jacks >= 1 and #tens >= 1 and #twos >= 1 then
+            return { SMODS.merge_lists(queens, jacks, tens, twos) }
+        end
+
+        return {}
+    end
+}
+
 -- ==Misc UI Changes==
 local nf = number_format
 function number_format(...)

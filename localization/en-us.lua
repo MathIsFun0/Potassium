@@ -286,6 +286,13 @@ return {
 		},
 		poker_hands = {
 			["cry_Bulwark"] = "Bananawark",
+			["banana_bouquet"] = "Virgin Bouquet",
 		},
+		poker_hand_descriptions = {
+			["banana_bouquet"] = {
+				"A hand that contains a",
+				"Queen, Jack, 10, and 2"
+			}
+		}
 	}
 }
