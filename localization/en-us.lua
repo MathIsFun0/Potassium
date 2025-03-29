@@ -143,6 +143,23 @@ return {
                     "permanently gains",
                     "{C:glop}+#1#{} Glop when scored",
 				}
+			},
+			j_banana_plantation = {
+				name = "Plantation",
+				text = {
+					"{C:attention}Banana{} Jokers give {X:mult,C:white}X#1#{} Mult",
+					"At end of round, apply",
+					"{C:attention}Banana{} to adjacent Jokers",
+				}
+			},
+			j_banana_bluejava = {
+				name = "Blue Java",
+				text = {
+                    "{X:dark_edition,C:white} ^#1# {} Mult",
+                    "{C:green}#2# in #3#{} chance this",
+                    "card is destroyed",
+                    "at end of round",
+				}
 			}
 		},
 		Edition = {
@@ -207,6 +224,14 @@ return {
 					"{C:inactive}(Must have room)"
 				}
 			},
+			c_banana_fruit = {
+				name = "Fruit",
+				text = {
+					"Applies {C:attention}Banana{} to",
+					"a random Joker, gain {C:money}$20",
+					"Some Jokers {C:attention,E:1}evolve"
+				}
+			}
 		},
 		Tag = {
 			tag_banana_glop = {

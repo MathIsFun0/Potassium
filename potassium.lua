@@ -247,18 +247,14 @@ function Game:update(dt)
             end
         end
 	end
+    if not G.GAME.probabilities.normal and SMODS.find_card("j_oops") then
+        G.GAME.probabilities.normal = 10^1000
+    end
 end
 
 -- ===Banana Content===
 SMODS.Back{
     key = "banana",
-    --[[loc_txt = {
-        name = "Banana Deck",
-        text = {
-            "All cards are",
-            "{C:red,T:m_stone}Gros Michel{}",
-        }
-    },]]
     prefix_config = {
         atlas = false
     },
@@ -297,6 +293,12 @@ if not (SMODS.Mods["Cryptid"] or {}).can_load then
                         return true
                     end,
                 }))
+                if self.ability.name == "Gros Michel" then
+                    G.GAME.pool_flags.gros_michel_extinct = true
+                end
+                if self.ability.name == "Cavendish" then
+                    G.GAME.pool_flags.cavendish_extinct = true
+                end
                 return {
                     message = localize("k_extinct_ex")
                 }
@@ -322,10 +324,10 @@ if not (SMODS.Mods["Cryptid"] or {}).can_load then
         key = "banana",
         atlas = "sticker",
         pos = { x = 0, y = 0 },
-        rate = 0.3,
         needs_enable_flag = true,
+        --Either SMODS doesn't do this or I am silly
         should_apply = function(self, card, center, area, bypass_roll)
-            return (area == G.pack_cards or area == G.shop_jokers) and card.ability.set == "Joker"
+            return (area == G.pack_cards or area == G.shop_jokers) and card.ability.set == "Joker" and pseudorandom(pseudoseed("stickernana"..G.GAME.round_resets.ante)) < 0.3 and G.GAME.modifiers.enable_banana
         end,
         loc_vars = function(self, info_queue, card)
             return { vars = { G.GAME.probabilities.normal or 1, 10 } }
@@ -356,6 +358,165 @@ if not (SMODS.Mods["Cryptid"] or {}).can_load then
         colour = HEX("e8c500"),
     })
 end
+
+BANANA_EVOLUTIONS = {}
+SMODS.Consumable{
+    key = "fruit",
+    pos = {x = 0, y = 0},
+    set = "Spectral",
+    can_use = function(self, card)
+        for i = 1, #G.jokers.cards do
+            if not G.jokers.cards[i].ability.banana and not G.jokers.cards[i].ability.eternal then
+                return true
+            end
+        end        
+    end,
+    use = function(self, card, area)
+        local eligible_jokers = {}
+        for i = 1, #G.jokers.cards do
+            if not G.jokers.cards[i].ability.banana and not G.jokers.cards[i].ability.eternal then
+                eligible_jokers[#eligible_jokers+1] = G.jokers.cards[i]
+            end
+        end
+        local joker = pseudorandom_element(eligible_jokers, pseudoseed("fruit"..G.GAME.round_resets.ante))
+        if joker then
+            if BANANA_EVOLUTIONS[joker.config.center.key] then
+                joker:set_ability(G.P_CENTERS[BANANA_EVOLUTIONS[joker.config.center.key]])
+                play_sound("banana_glopedition", 1, 1)
+            else
+                joker:set_banana(true)
+            end
+            joker:juice_up(0.3, 0.4)
+            ease_dollars(20)
+        end
+    end,
+    loc_vars = function(self, info_queue, card)
+        info_queue[#info_queue+1] = {set = "Other", key = "banana", vars = {G.GAME.probabilities.normal or 1,10}}
+    end,
+}
+
+
+SMODS.Joker{
+	key = "plantation",
+	pos = { x = 0, y = 0 },
+	config = { extra = { xmult = 2 } },
+	rarity = 3,
+	cost = 8,
+	blueprint_compat = true,
+	loc_vars = function(self, info_queue, center)
+        info_queue[#info_queue+1] = {set = "Other", key = "banana", vars = {G.GAME.probabilities.normal or 1,10}}
+		return { vars = { center.ability.extra.xmult } }
+	end,
+	calculate = function(self, card, context)
+		if context.other_joker and context.other_joker.ability.banana then
+			return {
+				xmult = card.ability.extra.xmult,
+			}
+		end
+		if context.end_of_round and context.cardarea == G.jokers and not context.blueprint then
+            for i = 1, #G.jokers.cards do
+				if G.jokers.cards[i] == card then
+					if i > 1 then
+						G.jokers.cards[i - 1]:set_banana(true)
+                        G.jokers.cards[i - 1]:juice_up(0.3, 0.4)
+					end
+					if i < #G.jokers.cards then
+						G.jokers.cards[i + 1]:set_banana(true)
+                        G.jokers.cards[i + 1]:juice_up(0.3, 0.4)
+					end
+				end
+			end
+        end
+	end,
+}
+
+-- Make Cavendish banned as well
+SMODS.Joker:take_ownership('j_cavendish', {
+    no_pool_flag = 'cavendish_extinct',
+    calculate = function(self, card, context)
+		if context.joker_main then
+            return {
+                message = localize{type='variable',key='a_xmult',vars={card.ability.extra.Xmult}},
+                Xmult_mod = card.ability.extra.Xmult,
+            }
+		end
+        if context.end_of_round and context.cardarea == G.jokers and not context.blueprint then
+            if pseudorandom('cavendish') < G.GAME.probabilities.normal/card.ability.extra.odds then 
+                G.E_MANAGER:add_event(Event({
+                    func = function()
+                        play_sound('tarot1')
+                        card.T.r = -0.2
+                        card:juice_up(0.3, 0.4)
+                        card.states.drag.is = true
+                        card.children.center.pinch.x = true
+                        G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.3, blockable = false,
+                            func = function()
+                                    G.jokers:remove_card(card)
+                                    card:remove()
+                                    card = nil
+                                return true; end})) 
+                        return true
+                    end
+                })) 
+                G.GAME.pool_flags.cavendish_extinct = true
+                return {
+                    message = localize('k_extinct_ex')
+                }
+            else
+                return {
+                    message = localize('k_safe_ex')
+                }
+            end
+        end
+    end
+})
+
+SMODS.Joker{
+	key = "bluejava",
+    yes_pool_flag = 'cavendish_extinct',
+	pos = { x = 0, y = 0 },
+	rarity = 1,
+	cost = 4,
+    config = { extra = { emult = 2, odds = 2^1023.99 } },
+	blueprint_compat = true,
+	loc_vars = function(self, info_queue, center)
+        return { vars = { center.ability.extra.emult, G.GAME.probabilities.normal, center.ability.extra.odds } }
+	end,
+	calculate = function(self, card, context)
+		if context.joker_main then
+            return {
+                emult = card.ability.extra.emult
+            }
+		end
+        if context.end_of_round and context.cardarea == G.jokers and not context.blueprint then
+            if pseudorandom('bluejava') < G.GAME.probabilities.normal/card.ability.extra.odds then 
+                G.E_MANAGER:add_event(Event({
+                    func = function()
+                        play_sound('tarot1')
+                        card.T.r = -0.2
+                        card:juice_up(0.3, 0.4)
+                        card.states.drag.is = true
+                        card.children.center.pinch.x = true
+                        G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.3, blockable = false,
+                            func = function()
+                                    G.jokers:remove_card(card)
+                                    card:remove()
+                                    card = nil
+                                return true; end})) 
+                        return true
+                    end
+                })) 
+                return {
+                    message = localize('k_extinct_ex')
+                }
+            else
+                return {
+                    message = localize('k_safe_ex')
+                }
+            end
+        end
+    end,
+}
 
 --Misc stuff
 local cuib = create_UIBox_buttons
@@ -739,6 +900,10 @@ for _, v in ipairs({'glop', 'xglop', 'eglop'}) do
     table.insert(SMODS.calculation_keys, v)
 end
 
+if not (SMODS.Mods["Talisman"] or {}).can_load then
+    table.insert(SMODS.calculation_keys, 'emult')
+end
+
 local cie = SMODS.calculate_individual_effect
 function SMODS.calculate_individual_effect(effect, scored_card, key, amount, from_edition)
     local ret = cie(effect, scored_card, key, amount, from_edition)
@@ -772,6 +937,18 @@ function SMODS.calculate_individual_effect(effect, scored_card, key, amount, fro
             card_eval_status_text(scored_card, 'jokers', nil, percent, nil, {message = "^"..number_format(amount).." Glop", colour =  G.C.GLOP, sound = "banana_glopedition"})
         end
         return true
+    end
+
+    if not (SMODS.Mods["Talisman"] or {}).can_load then
+        if key == 'emult' and amount ~= 1 then 
+            if effect.card then juice_card(effect.card) end
+            mult = mod_mult(mult ^ amount)
+            update_hand_text({delay = 0}, {chips = hand_chips, mult = mult, glop = glop})
+            if not effect.remove_default_message then
+                card_eval_status_text(scored_card, 'jokers', nil, percent, nil, {message = "^"..number_format(amount).." Mult", colour =  G.C.MULT, sound = "multhit2"})
+            end
+            return true
+        end
     end
 end
 
@@ -913,7 +1090,7 @@ SMODS.Joker{
 	calculate = function(self, card, context)
 		if context.joker_main and card.ability.extra.glop > 0 then
 			return {
-				glop = card.ability.extra.glop,
+				glop = card.ability.exftra.glop,
 			}
 		end
 		if context.end_of_round and context.cardarea == G.jokers and not context.blueprint then
