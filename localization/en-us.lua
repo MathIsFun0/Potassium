@@ -31,7 +31,7 @@ return {
 				text = {
 					"Guarantees all {C:attention}listed",
 					"{C:green,E:1,S:1.1}probabilities",
-					"{C:inactive}(ex: {C:green}1 in 3{C:inactive} -> {C:green}inf in 3{C:inactive})",
+					"{C:inactive}(ex: {C:green}1 in 3{C:inactive} -> {C:green}bananeinf in 3{C:inactive})",
 				}
 			},
 			j_marble = {
@@ -169,8 +169,17 @@ return {
 				name="Blue Stake",
 				text={
 					"{C:red}Removes{} Discards",
+                    "{s:0.8}Applies all previous Stakes",
 				},
-			}
+			},
+			banana = {
+				name = "Banana Stake",
+				text = {
+					"Cards can be {C:attention}Banana{}",
+					"{s:0.8,C:inactive}({C:green}1 in 10{C:inactive} chance of being destroyed each round){}",
+                    "{s:0.8}Applies all previous Stakes",
+				},
+			},
 		},
 		Spectral = {
 			c_banana_substance = {
@@ -224,8 +233,15 @@ return {
 				text = {
 					"{C:glop}+#1#{} Glop",
 				}
-			}
-		}
+			},
+			banana = {
+				name = "Banana",
+				text = {
+					"{C:green}#1# in #2#{} chance of being",
+					"destroyed each round",
+				},
+			},
+		},
 	},
 	misc={
 		challenge_names = {
@@ -241,6 +257,7 @@ return {
 		},
 		labels = {
 			banana_glop = "Glop",
+			banana = "Banana",
 		},
 		poker_hands = {
 			["cry_Bulwark"] = "Bananawark",

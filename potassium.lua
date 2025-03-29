@@ -51,6 +51,12 @@ SMODS.Atlas{
     py = 95,
 }
 SMODS.Atlas{
+    key = "sticker",
+    path = "sticker.png",
+    px = 71,
+    py = 95,
+}
+SMODS.Atlas{
     key = "balatro",
     path = "title.png",
     px = 333,
@@ -79,16 +85,8 @@ SMODS.Sound({
 -- ===Add updates to existing Jokers===
 SMODS.Joker:take_ownership('j_oops', {
     name = "Oops! All Bananas",
-    --[[loc_txt = {
-		name = "Oops! All Bananas",
-		text = {
-			"Guarantees all {C:attention}listed",
-			"{C:green,E:1,S:1.1}probabilities",
-			"{C:inactive}(ex: {C:green}1 in 3{C:inactive} -> {C:green}inf in 3{C:inactive})",
-		}
-	},]]
     add_to_deck = function(self, card, from_debuff)
-        G.GAME.probabilities.normal = 1e308
+        G.GAME.probabilities.normal = 10^309
     end,
     remove_from_deck = function(self, card, from_debuff)
         if not next(SMODS.find_card('j_oops')) then
@@ -270,6 +268,94 @@ SMODS.Back{
         G.GAME.starting_params.banana = true
     end
 }
+
+if not (SMODS.Mods["Cryptid"] or {}).can_load then
+    function Card:calculate_banana()
+        if not self.ability.extinct then
+            if self.ability.banana and (pseudorandom("banana") < G.GAME.probabilities.normal / 10) then
+                self.ability.extinct = true
+                G.E_MANAGER:add_event(Event({
+                    func = function()
+                        play_sound("tarot1")
+                        self.T.r = -0.2
+                        self:juice_up(0.3, 0.4)
+                        self.states.drag.is = true
+                        self.children.center.pinch.x = true
+                        G.E_MANAGER:add_event(Event({
+                            trigger = "after",
+                            delay = 0.3,
+                            blockable = false,
+                            func = function()
+                                if self.area then
+                                    self.area:remove_card(self)
+                                end
+                                self:remove()
+                                self = nil
+                                return true
+                            end,
+                        }))
+                        return true
+                    end,
+                }))
+                return {
+                    message = localize("k_extinct_ex")
+                }
+            elseif self.ability.banana then
+                return {
+                    message = localize("k_safe_ex")
+                }
+            end
+        end
+    end
+    function Card:set_banana(_banana)
+        self.ability.banana = _banana
+    end
+    local se = Card.set_eternal
+    function Card:set_eternal(_eternal)
+        if not self.ability.banana then
+            se(self, _eternal)
+        end
+    end
+    SMODS.Sticker({
+        badge_colour = HEX("e8c500"),
+        prefix_config = { key = false },
+        key = "banana",
+        atlas = "sticker",
+        pos = { x = 0, y = 0 },
+        rate = 0.3,
+        needs_enable_flag = true,
+        should_apply = function(self, card, center, area, bypass_roll)
+            return (area == G.pack_cards or area == G.shop_jokers) and card.ability.set == "Joker"
+        end,
+        loc_vars = function(self, info_queue, card)
+            return { vars = { G.GAME.probabilities.normal or 1, 10 } }
+        end,
+        calculate = function(self, card, context)
+            if
+                context.end_of_round
+                and not context.repetition
+                and not context.playing_card_end_of_round
+                and not context.individual
+            then
+                if card.ability.set == "Joker" then
+                    return card:calculate_banana()
+                end
+            end
+        end,
+    })
+    SMODS.Stake({
+        key = "banana",
+        pos = { x = 3, y = 1 },
+        sticker_atlas = "sticker",
+        sticker_pos = {x = 0, y = 0},
+        applied_stakes = { "stake_gold" },
+        prefix_config = false,
+        modifiers = function()
+            G.GAME.modifiers.enable_banana = true
+        end,
+        colour = HEX("e8c500"),
+    })
+end
 
 --Misc stuff
 local cuib = create_UIBox_buttons
@@ -503,14 +589,14 @@ SMODS.Blind{
 
 SMODS.Blind{
     key = "banana2",
-    pos = {x = 0, y = 0},
+    pos = {x = 0, y = 1},
     atlas = "blinds",
     loc_vars = function(self, info_queue, card)
         return {
             vars = {G.GAME and G.GAME.probabilities.normal or 1}
         }
     end,
-    boss_colour = G.C.BANAN2,
+    boss_colour = G.C.BANAN1,
     boss = {min = 9999, max = 10, showdown = true},
     in_pool = function() return false end,
     dollars = 15,
@@ -537,6 +623,7 @@ SMODS.Blind{
                         context.other_card.children.center.pinch.x = true
                         G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.3, blockable = false,
                             func = function()
+                                    context.other_card:remove_from_deck()
                                     G.jokers:remove_card(context.other_card)
                                     context.other_card:remove()
                                     context.other_card = nil
@@ -783,7 +870,8 @@ end
 -- Glop Content
 SMODS.Joker{
 	key = "glopbucket",
-	pos = { x = 0, y = 0 },
+	pos = { x = 1, y = 5 },
+    atlas = "banana",
 	config = { extra = { extra = 0.01, glop = 0 } },
 	rarity = 2,
 	cost = 7,
@@ -1302,6 +1390,9 @@ function banana_credits()
               {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
                 {n=G.UIT.T, config={text = 'notmario', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
               }},
+              {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
+                {n=G.UIT.T, config={text = 'Mystic Misclick', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
+              }},
             }},
             {n=G.UIT.C, config={align = "tl", padding = 0.05, minw = 2.5}, nodes={
                 {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
@@ -1336,6 +1427,9 @@ function banana_credits()
               }},
               {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
                 {n=G.UIT.T, config={text = 'George the Rat', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
+              }},
+              {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
+                {n=G.UIT.T, config={text = '5381', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
               }},
             }},
           }},
