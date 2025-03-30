@@ -85,6 +85,18 @@ return {
                     "{C:attention}discard",
                 },
 			},
+			j_flower_pot = {
+				name = "Flower Pot",
+				text = {
+                    "{X:mult,C:white} X3 {} Mult and {C:glop}+1{} Glop",
+                    "if poker hand contains a",
+					"{C:attention}Queen{}, {C:attention}Jack{}, {C:attention}10{}, and {C:attention}2",
+				},
+                unlock={
+                    "Reach Ante",
+                    "level {E:1,C:attention}#1#",
+                },
+			},
 			j_banana_glopbucket = {
 				name = "A Glop in the Bucket",
 				text = {
@@ -260,6 +272,16 @@ return {
 					"gain {C:glop}+0.1{} Glop"
 				}
 			},
+			c_banana_bouquetpl = {
+				name = "Dvant",
+				text = {
+					"{S:0.8}({S:0.8,V:1}lvl.#1#{S:0.8}){} Level up",
+					"{C:attention}#2#",
+					"{C:mult}+#3#{} Mult and",
+					"{C:chips}+#4#{} Chips and",
+					"{C:glop}+#5#{} Glop",
+				}
+			},
 		},
 		Other = {
 			card_extra_glop = {
@@ -287,6 +309,7 @@ return {
 			ph_you_win = "BANANA!",
 			ph_score_best_glop = "Best Glop",
 			cry_hand_bulwark = "Bananawark",
+			banana_bouquet = "Virgin Bouquet",
 		},
 		labels = {
 			banana_glop = "Glop",

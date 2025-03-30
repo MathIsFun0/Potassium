@@ -606,9 +606,9 @@ function Game:init_game_object()
         G.PROFILES[G.SETTINGS.profile].glop = 1
     end
     for k, v in pairs(ret.hands) do
-        v.glop = to_big(G.PROFILES[G.SETTINGS.profile].glop)
-        v.s_glop = to_big(G.PROFILES[G.SETTINGS.profile].glop)
-        v.l_glop = v.l_mult * 0.01
+        v.glop = (v.glop or 1) + (to_big(G.PROFILES[G.SETTINGS.profile].glop) - 1)
+        v.s_glop = v.glop
+        v.l_glop = v.l_glop or (v.l_mult * 0.01)
     end
     return ret
 end
@@ -1515,8 +1515,9 @@ SMODS.Consumable{
 -- this came to me in a dream
 SMODS.PokerHand {
     key = "bouquet",
-    chips=39.9,mult=4,
-    l_chips=30,l_mult=3,
+    chips=20,mult=4,glop=2,
+    l_chips=15,l_mult=1,l_glop=0.2,
+    visible = false,
     example = {
         { 'S_Q', true, },
         { 'H_J', true, },
@@ -1529,29 +1530,70 @@ SMODS.PokerHand {
         local jacks = {}
         local tens = {}
         local twos = {}
+        local scoring = {}
 
         for _, card in pairs(hand) do
             if card:get_id() == 10 then
                 tens[#tens + 1] = card
+                scoring[#scoring + 1] = card
             end
             if card:get_id() == 11 then
                 jacks[#jacks + 1] = card
+                scoring[#scoring + 1] = card
             end
             if card:get_id() == 12 then
                 queens[#queens + 1] = card
+                scoring[#scoring + 1] = card
             end
             if card:get_id() == 2 then
                 twos[#twos + 1] = card
+                scoring[#scoring + 1] = card
             end
         end
 
         if #queens >= 1 and #jacks >= 1 and #tens >= 1 and #twos >= 1 then
-            return { SMODS.merge_lists(queens, jacks, tens, twos) }
+            return { scoring }
         end
 
         return {}
     end
 }
+
+SMODS.Consumable{
+	set = "Planet",
+	key = "bouquetpl",
+	config = { hand_type = "banana_bouquet", softlock = true },
+	pos = { x = 0, y = 0 },
+	loc_vars = function(self, info_queue, center)
+		return {
+			vars = {
+				G.GAME.hands["banana_bouquet"].level,
+				localize("banana_bouquet"),
+				G.GAME.hands["banana_bouquet"].l_mult,
+				G.GAME.hands["banana_bouquet"].l_chips,
+				G.GAME.hands["banana_bouquet"].l_glop,
+				colours = {
+					(
+						to_big(G.GAME.hands["banana_bouquet"].level) == to_big(1) and G.C.UI.TEXT_DARK
+						or G.C.HAND_LEVELS[math.min(7, G.GAME.hands["banana_bouquet"].level)]
+					),
+				},
+			},
+		}
+	end,
+}
+
+
+SMODS.Joker:take_ownership('j_flower_pot', {
+    calculate = function(self, card, context)
+        if context.joker_main and context.poker_hands and next(context.poker_hands["banana_bouquet"]) then
+			return {
+				xmult = 3,
+                glop = 1,
+			}
+		end
+    end,
+})
 
 -- ==Misc UI Changes==
 local nf = number_format
