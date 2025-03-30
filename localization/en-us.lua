@@ -180,6 +180,61 @@ return {
                     "card is destroyed",
                     "at end of round",
 				}
+			},
+			j_banana_bananasplit = {
+				name = "Banana Split",
+				text = {
+					"{C:chips}+#1#{} Chips",
+                    "{C:green}#2# in #3#{} chance this",
+                    "card is {C:attention}split",
+                    "at end of round",
+					"{C:inactive}(Does not require room)"
+				}
+			},
+			j_banana_potassium = {
+				name = "Potassium in a Bottle",
+				text = {
+					"Retrigger all cards {C:attention}#1#{} additional times",
+					"Scoring cards become {C:attention}Banana",
+                    "{C:green}#2# in #3#{} chance this card",
+                    "is destroyed at end of round",
+				}
+			},
+			j_banana_begg = {
+				name = "Begg",
+				text = {
+                    "Gains {C:money}$#1#{} of",
+                    "{C:attention}sell value{} at",
+                    "end of round",
+					"{C:green}#2# in #3#{} chance to",
+					"{C:attention}halve{} sell value instead"
+				}
+			},
+			j_banana_bean = {
+				name = "Banana Bean",
+				text = {
+                    "{C:attention}+#1#{} hand size, increases",
+                    "by {C:attention}#2#{} every round",
+					"{C:green}#3# in #4#{} chance to destroy",
+					"this Joker and scored cards",
+					"when hand played"
+				}
+			},
+			j_banana_bread = {
+				name = "Banana Bread",
+				text = {
+					"Gain {X:mult,C:white} X#1# {} Mult when a",
+					"{C:attention}Banana{} card goes extinct",
+					"{C:inactive}(Currently: {X:mult,C:white}X#2#{C:inactive} Mult)",
+				}
+			},
+			j_banana_glegg = {
+				name = "Glegg",
+				text = {
+					"When Blind selected,",
+					"create a {C:attention}Glopur{C:inactive,E:1}?",
+					"{C:inactive}(Must have room)"
+				}
 			}
 		},
 		Edition = {
@@ -292,10 +347,18 @@ return {
 			banana = {
 				name = "Banana",
 				text = {
-					"{C:green}#1# in #2#{} chance of being",
-					"destroyed each round",
+					"{C:green}#1# in #2#{} chance this",
+					"card is destroyed",
+					"at end of round",
 				},
 			},
+			banana_playing_card = {
+				name = "Banana",
+				text = {
+					"{C:green}#1# in #2#{} chance",
+					"to destroy card",
+				},
+			}
 		},
 	},
 	misc={
@@ -306,6 +369,7 @@ return {
 		dictionary = {
 			k_plus_stone = "+1 Banana",
 			k_balanced = "Bananalanced",
+			k_split_ex = "Split!",
 			ph_you_win = "BANANA!",
 			ph_score_best_glop = "Best Glop",
 			cry_hand_bulwark = "Bananawark",
