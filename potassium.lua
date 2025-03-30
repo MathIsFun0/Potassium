@@ -398,7 +398,8 @@ SMODS.Consumable{
 
 SMODS.Joker{
 	key = "plantation",
-	pos = { x = 0, y = 0 },
+	pos = { x = 1, y = 6 },
+    atlas = "banana",
 	config = { extra = { xmult = 2 } },
 	rarity = 3,
 	cost = 8,

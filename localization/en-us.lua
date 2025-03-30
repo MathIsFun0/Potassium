@@ -77,6 +77,14 @@ return {
                     "and draw it to {C:attention}hand",
                 },
             },
+			j_banner = {
+				name = "Bananner",
+                text={
+                    "{C:chips}+#1#{} Chips for",
+                    "each remaining",
+                    "{C:attention}discard",
+                },
+			},
 			j_banana_glopbucket = {
 				name = "A Glop in the Bucket",
 				text = {
