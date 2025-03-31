@@ -251,6 +251,35 @@ function Game:update(dt)
     if not G.GAME.probabilities.normal and SMODS.find_card("j_oops") then
         G.GAME.probabilities.normal = 10^1000
     end
+
+    --scoring gratification logic
+    if G.STATE == G.STATES.HAND_PLAYED then
+        local val = G.GAME.current_round.current_hand.chips * G.GAME.current_round.current_hand.mult * G.GAME.current_round.current_hand.glop
+        if val > G.ARGS.score_intensity.required_score then
+            local scaler = math.min(1000,math.log10(val/G.ARGS.score_intensity.required_score))
+            if math.random() < scaler * dt * 1.5 then
+                local glop_scaler = 1/(1+math.exp(-2*(math.log10(G.GAME.current_round.current_hand.glop)-1)))
+                local text = pseudorandom_element(G.localization.misc.banana_quips, pseudoseed("🍌"))
+                local color = G.C["BANAN"..tostring(math.random(2))]
+                if math.random() < glop_scaler then
+                    text = pseudorandom_element(G.localization.misc.glop_quips, pseudoseed("🟩"))
+                    color = G.C.GLOP
+                end
+                attention_text({
+                    text = text,
+                    offset = {
+                        x = math.random() * (G.TILE_W - 1) - G.TILE_W / 2,
+                        y = math.random() * (G.TILE_H - 1) - G.TILE_H / 2,
+                    },
+                    major = G.play,
+                    colour = color,
+                    hold = (math.random() * 3 + 2 + scaler/10)*G.SETTINGS.GAMESPEED,
+                    text_rot = math.random() * math.pi * 1 - math.pi * 0.5,
+                    emboss = 0.05
+                })
+            end
+        end
+    end
 end
 
 -- ===Banana Content===
@@ -392,6 +421,147 @@ if not (SMODS.Mods["Cryptid"] or {}).can_load then
         end,
         colour = HEX("e8c500"),
     })
+
+    --yoink floating_sprite2 for glopway
+    SMODS.DrawStep({
+        key = "floating_sprite2",
+        order = 59,
+        func = function(self)
+            if self.ability.name == "cry-Gateway" and (self.config.center.discovered or self.bypass_discovery_center) then
+                local scale_mod2 = 0.07 -- + 0.02*math.cos(1.8*G.TIMERS.REAL) + 0.00*math.cos((G.TIMERS.REAL - math.floor(G.TIMERS.REAL))*math.pi*14)*(1 - (G.TIMERS.REAL - math.floor(G.TIMERS.REAL)))^3
+                local rotate_mod2 = 0 --0.05*math.cos(1.219*G.TIMERS.REAL) + 0.00*math.cos((G.TIMERS.REAL)*math.pi*5)*(1 - (G.TIMERS.REAL - math.floor(G.TIMERS.REAL)))^2
+                self.children.floating_sprite2:draw_shader(
+                    "dissolve",
+                    0,
+                    nil,
+                    nil,
+                    self.children.center,
+                    scale_mod2,
+                    rotate_mod2,
+                    nil,
+                    0.1 --[[ + 0.03*math.cos(1.8*G.TIMERS.REAL)--]],
+                    nil,
+                    0.6
+                )
+                self.children.floating_sprite2:draw_shader(
+                    "dissolve",
+                    nil,
+                    nil,
+                    nil,
+                    self.children.center,
+                    scale_mod2,
+                    rotate_mod2
+                )
+    
+                local scale_mod = 0.05
+                    + 0.05 * math.sin(1.8 * G.TIMERS.REAL)
+                    + 0.07
+                        * math.sin((G.TIMERS.REAL - math.floor(G.TIMERS.REAL)) * math.pi * 14)
+                        * (1 - (G.TIMERS.REAL - math.floor(G.TIMERS.REAL))) ^ 3
+                local rotate_mod = 0.1 * math.sin(1.219 * G.TIMERS.REAL)
+                    + 0.07
+                        * math.sin(G.TIMERS.REAL * math.pi * 5)
+                        * (1 - (G.TIMERS.REAL - math.floor(G.TIMERS.REAL))) ^ 2
+    
+                self.children.floating_sprite.role.draw_major = self
+                self.children.floating_sprite:draw_shader(
+                    "dissolve",
+                    0,
+                    nil,
+                    nil,
+                    self.children.center,
+                    scale_mod,
+                    rotate_mod,
+                    nil,
+                    0.1 + 0.03 * math.sin(1.8 * G.TIMERS.REAL),
+                    nil,
+                    0.6
+                )
+                self.children.floating_sprite:draw_shader(
+                    "dissolve",
+                    nil,
+                    nil,
+                    nil,
+                    self.children.center,
+                    scale_mod,
+                    rotate_mod
+                )
+            end
+            if
+                self.config.center.soul_pos
+                and self.config.center.soul_pos.extra
+                and (self.config.center.discovered or self.bypass_discovery_center)
+            then
+                local scale_mod = 0.07 -- + 0.02*math.cos(1.8*G.TIMERS.REAL) + 0.00*math.cos((G.TIMERS.REAL - math.floor(G.TIMERS.REAL))*math.pi*14)*(1 - (G.TIMERS.REAL - math.floor(G.TIMERS.REAL)))^3
+                local rotate_mod = 0 --0.05*math.cos(1.219*G.TIMERS.REAL) + 0.00*math.cos((G.TIMERS.REAL)*math.pi*5)*(1 - (G.TIMERS.REAL - math.floor(G.TIMERS.REAL)))^2
+                self.children.floating_sprite2:draw_shader(
+                    "dissolve",
+                    0,
+                    nil,
+                    nil,
+                    self.children.center,
+                    scale_mod,
+                    rotate_mod,
+                    nil,
+                    0.1 --[[ + 0.03*math.cos(1.8*G.TIMERS.REAL)--]],
+                    nil,
+                    0.6
+                )
+                self.children.floating_sprite2:draw_shader(
+                    "dissolve",
+                    nil,
+                    nil,
+                    nil,
+                    self.children.center,
+                    scale_mod,
+                    rotate_mod
+                )
+            end
+        end,
+        conditions = { vortex = false, facing = "front" },
+    })
+    SMODS.draw_ignore_keys.floating_sprite2 = true 
+    local set_spritesref = Card.set_sprites
+    function Card:set_sprites(_center, _front)
+        set_spritesref(self, _center, _front)
+        if _center and _center.name == "cry-Gateway" then
+            self.children.floating_sprite = Sprite(
+                self.T.x,
+                self.T.y,
+                self.T.w,
+                self.T.h,
+                G.ASSET_ATLAS[_center.atlas or _center.set],
+                { x = 2, y = 0 }
+            )
+            self.children.floating_sprite.role.draw_major = self
+            self.children.floating_sprite.states.hover.can = false
+            self.children.floating_sprite.states.click.can = false
+            self.children.floating_sprite2 = Sprite(
+                self.T.x,
+                self.T.y,
+                self.T.w,
+                self.T.h,
+                G.ASSET_ATLAS[_center.atlas or _center.set],
+                { x = 1, y = 0 }
+            )
+            self.children.floating_sprite2.role.draw_major = self
+            self.children.floating_sprite2.states.hover.can = false
+            self.children.floating_sprite2.states.click.can = false
+        end
+        if _center and _center.soul_pos and _center.soul_pos.extra then
+            self.children.floating_sprite2 = Sprite(
+                self.T.x,
+                self.T.y,
+                self.T.w,
+                self.T.h,
+                G.ASSET_ATLAS[_center.atlas or _center.set],
+                _center.soul_pos.extra
+            )
+            self.children.floating_sprite2.role.draw_major = self
+            self.children.floating_sprite2.states.hover.can = false
+            self.children.floating_sprite2.states.click.can = false
+        end
+    end   
 end
 
 BANANA_EVOLUTIONS = {
@@ -1821,6 +1991,9 @@ SMODS.Consumable{
 SMODS.Consumable{
     key = "glopway",
     set = "Spectral",
+    atlas = "banana",
+    pos = {x = 0, y = 8},
+    soul_pos = {x = 2, y = 8, extra = {x = 1, y = 8}},
     hidden = true,
     can_use = function(self, card)
         return #G.jokers.cards < G.jokers.config.card_limit or card.area == G.jokers      
@@ -1895,7 +2068,8 @@ SMODS.Consumable{
 	set = "Planet",
 	key = "bouquetpl",
 	config = { hand_type = "banana_bouquet", softlock = true },
-	pos = { x = 0, y = 0 },
+	pos = { x = 0, y = 6 },
+    atlas = "banana",
 	loc_vars = function(self, info_queue, center)
 		return {
 			vars = {
@@ -1941,7 +2115,7 @@ function banana_credits()
     return {n=G.UIT.ROOT, config={align = "cm", padding = 0.2, colour = G.C.BLACK, r = 0.1, emboss = 0.05, minh = 6, minw = 6}, nodes={
         {n=G.UIT.R, config={align = "cm", padding = 0.1,outline_colour = G.C.JOKER_GREY, r = 0.1, outline = 1}, nodes={
           {n=G.UIT.R, config={align = "cm", padding = 0}, nodes={
-            {n=G.UIT.T, config={text = "Programmed by MathIsFun_", scale = text_scale*0.6, colour = G.C.WHITE, shadow = true}},
+            {n=G.UIT.T, config={text = "Lead Developer: MathIsFun_", scale = text_scale*0.6, colour = G.C.WHITE, shadow = true}},
           }},
         }},
         {n=G.UIT.R, config={align = "cm", padding = 0.1,outline_colour = G.C.JOKER_GREY, r = 0.1, outline = 1}, nodes={
@@ -1986,6 +2160,9 @@ function banana_credits()
               {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
                 {n=G.UIT.T, config={text = 'Mystic Misclick', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
               }},
+              {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
+                {n=G.UIT.T, config={text = 'Aomi', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
+              }},
             }},
             {n=G.UIT.C, config={align = "tl", padding = 0.05, minw = 2.5}, nodes={
                 {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
@@ -2023,6 +2200,9 @@ function banana_credits()
               }},
               {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
                 {n=G.UIT.T, config={text = '5381', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
+              }},
+              {n=G.UIT.R, config={align = "cl", padding = 0}, nodes={
+                {n=G.UIT.T, config={text = 'GiygasBandicoot', scale = text_scale*0.5, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
               }},
             }},
           }},

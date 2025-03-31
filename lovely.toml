@@ -498,6 +498,63 @@ if glop > 0 then
 end
 '''
 
+[[patches]]
+[patches.pattern]
+target = "functions/UI_definitions.lua"
+pattern = '''{n=G.UIT.O, config={draw_layer = 1, object = DynaText({scale = args.scale, string = args.text, maxw = args.maxw, colours = {args.colour},float = true, shadow = true, silent = not args.noisy, args.scale, pop_in = 0, pop_in_rate = 6, rotate = args.rotate or nil})}},'''
+position = "at"
+match_indent = true
+payload = '''{n=G.UIT.O, config={draw_layer = 1, object = DynaText({scale = args.scale, string = args.text, maxw = args.maxw, colours = {args.colour},float = true, shadow = true, silent = not args.noisy, args.scale, pop_in = 0, pop_in_rate = 6, rotate = args.rotate or nil, text_rot = args.text_rot or 0})}},'''
+
+# Splash text
+[[patches]]
+[patches.pattern]
+target = "game.lua"
+pattern = '''G.SPLASH_LOGO.dissolve = 1'''
+position = "after"
+match_indent = true
+payload = '''
+G.E_MANAGER:add_event(Event({
+    func = function()
+if G.SPLASH_TEXT then
+    G.SPLASH_TEXT:remove()
+    G.SPLASH_TEXT = nil
+end
+G.SPLASH_TEXT = UIBox{
+    definition = {
+        n = G.UIT.ROOT,
+        config = { align = "cm", colour = G.C.CLEAR },
+        nodes = {
+            {
+                n = G.UIT.O,
+                config = {
+                    object = DynaText({
+                        string = pseudorandom_element(G.localization.misc.splash, pseudoseed(math.random(G.CONTROLLER.cursor_hover.T.x*0.33411983 + G.CONTROLLER.cursor_hover.T.y*0.874146 + 0.412311010*G.CONTROLLER.cursor_hover.time))),
+                        colours = { G.C.BANAN1 },
+                        shadow = true,
+                        float = true,
+                        rotate = true,
+                        text_rot = -0.3,
+                        scale = 1.2,
+                        pop_in_rate = 1,
+                        pop_in = 0.3,
+                    }),
+                },
+            },
+        },
+    },
+    config = {
+        major = G.ROOM_ATTACH,
+        type = 'cm',
+        bond = 'Strong',
+        offset = {x=3.5,y=0.5}
+    }
+}return true
+                    end,
+                }))
+'''
+
+
 # Add credits tab
 [[patches]]
 [patches.pattern]
