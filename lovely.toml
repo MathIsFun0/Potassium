@@ -520,6 +520,7 @@ if G.SPLASH_TEXT then
     G.SPLASH_TEXT:remove()
     G.SPLASH_TEXT = nil
 end
+local st = pseudorandom_element(G.localization.misc.splash, pseudoseed(math.random(G.CONTROLLER.cursor_hover.T.x*0.33411983 + G.CONTROLLER.cursor_hover.T.y*0.874146 + 0.412311010*G.CONTROLLER.cursor_hover.time)))
 G.SPLASH_TEXT = UIBox{
     definition = {
         n = G.UIT.ROOT,
@@ -529,13 +530,13 @@ G.SPLASH_TEXT = UIBox{
                 n = G.UIT.O,
                 config = {
                     object = DynaText({
-                        string = pseudorandom_element(G.localization.misc.splash, pseudoseed(math.random(G.CONTROLLER.cursor_hover.T.x*0.33411983 + G.CONTROLLER.cursor_hover.T.y*0.874146 + 0.412311010*G.CONTROLLER.cursor_hover.time))),
+                        string = st,
                         colours = { G.C.BANAN1 },
                         shadow = true,
                         float = true,
                         rotate = true,
                         text_rot = -0.3,
-                        scale = 1.2,
+                        scale = math.min(1.2, 40/#st),
                         pop_in_rate = 1,
                         pop_in = 0.3,
                     }),
