@@ -1192,7 +1192,7 @@ SMODS.Blind{
     pos = {x = 0, y = 0},
     atlas = "blinds",
     banana = function(self)
-        if G.jokers.cards[1] then
+        if G.jokers.cards[1] and not G.GAME.blind.disabled then
 			local idx = pseudorandom(pseudoseed("bananeinf"), 1, #G.jokers.cards)
 			if G.jokers.cards[idx] then
 				if G.jokers.cards[idx].config.center.immune_to_vermillion then --what? cryptid compat? no wayyyy
@@ -1240,6 +1240,7 @@ SMODS.Blind{
         if
 			context.post_trigger
 			and context.other_card --animation-wise this looks weird sometimes
+            and not G.GAME.blind.disabled
 		then
             if
                 not context.other_card.ability.eternal
