@@ -71,6 +71,12 @@ SMODS.Atlas{
 	py = 34,
 	frames = 21,
 }
+SMODS.Atlas{
+    key = "tag",
+    path = "tag.png",
+    px = 34,
+    py = 34,
+}
 
 -- ==New Sounds==
 SMODS.Sound({
@@ -572,7 +578,8 @@ BANANA_EVOLUTIONS = {
 }
 SMODS.Consumable{
     key = "fruit",
-    pos = {x = 0, y = 0},
+    pos = {x = 0, y = 7},
+    atlas = "banana",
     set = "Spectral",
     can_use = function(self, card)
         for i = 1, #G.jokers.cards do
@@ -769,7 +776,8 @@ SMODS.Joker{
 
 SMODS.Joker{
 	key = "bananasplit",
-	pos = { x = 0, y = 0 },
+	pos = { x = 2, y = 7 },
+    atlas = "banana",
 	rarity = 1,
 	cost = 4,
     config = { extra = { chips = 200, odds = 6 } },
@@ -865,7 +873,8 @@ SMODS.Joker{
 
 SMODS.Joker{
 	key = "begg",
-	pos = { x = 0, y = 0 },
+	pos = { x = 2, y = 4 },
+    atlas = "banana",
 	rarity = 1,
 	cost = 4,
     config = { extra = { gain = 6, odds = 6 } },
@@ -895,7 +904,8 @@ SMODS.Joker{
 
 SMODS.Joker{
 	key = "bean",
-	pos = { x = 0, y = 0 },
+	pos = { x = 2, y = 6 },
+    atlas = "banana",
 	rarity = 2,
 	cost = 7,
     config = { extra = { h_size = 3, h_size_mod = 1, odds = 20 } },
@@ -1643,6 +1653,7 @@ SMODS.Joker{
 
 SMODS.Tag{
     key = "glop",
+    atlas = "tag",
     in_pool = function() return false end,
     apply = function(self, tag, context)
         if context.type == "tag_add" and context.tag.key ~= "tag_banana_glop" then
@@ -1790,7 +1801,8 @@ SMODS.Joker{
 
 SMODS.Joker{
 	key = "glegg",
-	pos = { x = 0, y = 0 },
+	pos = { x = 2, y = 5 },
+    atlas = "banana",
 	rarity = 1,
 	cost = 4,
 	blueprint_compat = true,

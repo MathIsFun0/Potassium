@@ -203,9 +203,8 @@ return {
 			j_banana_begg = {
 				name = "Begg",
 				text = {
-                    "Gains {C:money}$#1#{} of",
-                    "{C:attention}sell value{} at",
-                    "end of round",
+                    "Gains {C:money}$#1#{} of {C:attention}sell value{}",
+                    "at end of round",
 					"{C:green}#2# in #3#{} chance to",
 					"{C:attention}halve{} sell value instead"
 				}
@@ -300,7 +299,7 @@ return {
 				}
 			},
 			c_banana_fruit = {
-				name = "Fruit",
+				name = "Ambrosia",
 				text = {
 					"Applies {C:attention}Banana{} to",
 					"a random Joker, gain {C:money}$20",
