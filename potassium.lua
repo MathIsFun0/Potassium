@@ -730,7 +730,8 @@ SMODS.Joker:take_ownership('j_cavendish', {
 SMODS.Joker{
 	key = "bluejava",
     yes_pool_flag = 'cavendish_extinct',
-	pos = { x = 0, y = 0 },
+	pos = { x = 2, y = 2 },
+    atlas = "banana",
 	rarity = 1,
 	cost = 4,
     config = { extra = { emult = 2, odds = 2^1023.99 } },
@@ -819,7 +820,8 @@ SMODS.Joker{
 
 SMODS.Joker{
 	key = "potassium",
-	pos = { x = 0, y = 0 },
+	pos = { x = 2, y = 3 },
+    atlas = "banana",
 	rarity = 2,
 	cost = 7,
     config = { extra = { retr = 2, odds = 6 } },
