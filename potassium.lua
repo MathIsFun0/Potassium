@@ -262,7 +262,7 @@ function Game:update(dt)
     if G.STATE == G.STATES.HAND_PLAYED then
         if type(G.GAME.current_round.current_hand.chips) ~= "string" and type(G.GAME.current_round.current_hand.mult) ~= "string" and type(G.GAME.current_round.current_hand.glop) ~= "string" then
             local val = G.GAME.current_round.current_hand.chips * G.GAME.current_round.current_hand.mult * G.GAME.current_round.current_hand.glop
-            if val > G.ARGS.score_intensity.required_score then
+            if to_big(val) > to_big(G.ARGS.score_intensity.required_score) then
                 local scaler = math.min(1000,math.log10(val/G.ARGS.score_intensity.required_score))
                 if math.random() < scaler * dt * 1.5 then
                     local glop_scaler = 1/(1+math.exp(-2*(math.log10(G.GAME.current_round.current_hand.glop)-1)))
