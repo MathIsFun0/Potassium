@@ -260,29 +260,31 @@ function Game:update(dt)
 
     --scoring gratification logic
     if G.STATE == G.STATES.HAND_PLAYED then
-        local val = G.GAME.current_round.current_hand.chips * G.GAME.current_round.current_hand.mult * G.GAME.current_round.current_hand.glop
-        if val > G.ARGS.score_intensity.required_score then
-            local scaler = math.min(1000,math.log10(val/G.ARGS.score_intensity.required_score))
-            if math.random() < scaler * dt * 1.5 then
-                local glop_scaler = 1/(1+math.exp(-2*(math.log10(G.GAME.current_round.current_hand.glop)-1)))
-                local text = pseudorandom_element(G.localization.misc.banana_quips, pseudoseed("🍌"))
-                local color = G.C["BANAN"..tostring(math.random(2))]
-                if math.random() < glop_scaler then
-                    text = pseudorandom_element(G.localization.misc.glop_quips, pseudoseed("🟩"))
-                    color = G.C.GLOP
+        if type(G.GAME.current_round.current_hand.chips) ~= "string" and type(G.GAME.current_round.current_hand.mult) ~= "string" and type(G.GAME.current_round.current_hand.glop) ~= "string" then
+            local val = G.GAME.current_round.current_hand.chips * G.GAME.current_round.current_hand.mult * G.GAME.current_round.current_hand.glop
+            if val > G.ARGS.score_intensity.required_score then
+                local scaler = math.min(1000,math.log10(val/G.ARGS.score_intensity.required_score))
+                if math.random() < scaler * dt * 1.5 then
+                    local glop_scaler = 1/(1+math.exp(-2*(math.log10(G.GAME.current_round.current_hand.glop)-1)))
+                    local text = pseudorandom_element(G.localization.misc.banana_quips, pseudoseed("🍌"))
+                    local color = G.C["BANAN"..tostring(math.random(2))]
+                    if math.random() < glop_scaler then
+                        text = pseudorandom_element(G.localization.misc.glop_quips, pseudoseed("🟩"))
+                        color = G.C.GLOP
+                    end
+                    attention_text({
+                        text = text,
+                        offset = {
+                            x = math.random() * (G.TILE_W - 1) - G.TILE_W / 2,
+                            y = math.random() * (G.TILE_H - 1) - G.TILE_H / 2,
+                        },
+                        major = G.play,
+                        colour = color,
+                        hold = (math.random() * 3 + 2 + scaler/10)*G.SETTINGS.GAMESPEED,
+                        text_rot = math.random() * math.pi * 1 - math.pi * 0.5,
+                        emboss = 0.05
+                    })
                 end
-                attention_text({
-                    text = text,
-                    offset = {
-                        x = math.random() * (G.TILE_W - 1) - G.TILE_W / 2,
-                        y = math.random() * (G.TILE_H - 1) - G.TILE_H / 2,
-                    },
-                    major = G.play,
-                    colour = color,
-                    hold = (math.random() * 3 + 2 + scaler/10)*G.SETTINGS.GAMESPEED,
-                    text_rot = math.random() * math.pi * 1 - math.pi * 0.5,
-                    emboss = 0.05
-                })
             end
         end
     end
