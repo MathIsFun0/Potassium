@@ -1,8 +1,8 @@
 {
 	"id": "potassium",
 	"name": "Potassium",
-	"author": ["localthunk"],
-	"description": "An early version of Balatro 1.1",
+	"author": ["localthunk?"],
+	"description": "Banana-flavored April Fools' mod.",
 	"prefix": "banana",
 	"main_file": "potassium.lua", 
 	"badge_colour": "F5D953",
