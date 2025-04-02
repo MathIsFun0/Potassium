@@ -368,6 +368,7 @@ return {
 		dictionary = {
 			k_plus_stone = "+1 Banana",
 			k_balanced = "Bananalanced",
+			k_not_allowed_ex = "Yeet!",
 			k_split_ex = "Split!",
 			ph_you_win = "BANANA!",
 			ph_score_best_glop = "Best Glop",
@@ -557,7 +558,7 @@ return {
 			"For the love of glop!",
 			"can i haz glopburger",
 			"value set glop true",
-			"attempt to index 'glop' (a nil value)",
+			"attempt to perform arithmetic on global 'glop' (a nil value)",
 			"Don't glop too close to the sun!",
 			"Holy glopping bingle!",
 			"4 8 15 16 23 42 108!",

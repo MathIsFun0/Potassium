@@ -429,8 +429,19 @@ match_indent = true
 [patches.pattern]
 target = "functions/state_events.lua"
 pattern = '''check_and_set_high_score('hand', hand_chips*mult)'''
-position = "after"
-payload = '''check_and_set_high_score('best_glop', glop)'''
+position = "at"
+payload = '''if not glop then glop = 0 end
+check_and_set_high_score('hand', hand_chips*mult)
+check_and_set_high_score('best_glop', glop)
+'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "functions/state_events.lua"
+pattern = '''play_area_status_text("Not Allowed!")--localize('k_not_allowed_ex'), true)'''
+position = "at"
+payload = '''play_area_status_text(localize('k_not_allowed_ex'), true)'''
 match_indent = true
 
 # Tag calculations pre-scoring
