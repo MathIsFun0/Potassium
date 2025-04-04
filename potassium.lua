@@ -260,7 +260,7 @@ function Game:update(dt)
 
     --scoring gratification logic
     if G.STATE == G.STATES.HAND_PLAYED then
-        if type(G.GAME.current_round.current_hand.chips) ~= "string" and type(G.GAME.current_round.current_hand.mult) ~= "string" and type(G.GAME.current_round.current_hand.glop) ~= "string" then
+        if is_number(G.GAME.current_round.current_hand.chips) and is_number(G.GAME.current_round.current_hand.mult) and is_number(G.GAME.current_round.current_hand.glop) then
             local val = G.GAME.current_round.current_hand.chips * G.GAME.current_round.current_hand.mult * G.GAME.current_round.current_hand.glop
             if to_big(val) > to_big(G.ARGS.score_intensity.required_score) then
                 local scaler = math.min(1000,math.log10(val/G.ARGS.score_intensity.required_score))
@@ -1566,7 +1566,7 @@ SMODS.Joker{
 	calculate = function(self, card, context)
 		if context.joker_main and card.ability.extra.glop > 0 then
 			return {
-				glop = card.ability.exftra.glop,
+				glop = card.ability.extra.glop,
 			}
 		end
 		if context.end_of_round and context.cardarea == G.jokers and not context.blueprint then
